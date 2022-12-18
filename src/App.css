@@ -1,39 +1,38 @@
-.App {
+.main {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.canvas {
+  height: 85vh;
+  width: 95vw;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+  background-color: rgb(211, 211, 211);
+}
+
+
+.equ-card {
+  min-height: 15vh;
+  display: inline-block;
+  z-index: 0;
+  background-color: white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  border-radius: 30px;
+  font-size: calc(10px + 2vmin);
+  min-width: 15vw;
+  padding: .5rem;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-float infinite 3s ease-in-out;
-  }
-}
-
-.App-header {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-}
-
-.App-link {
-  color: rgb(112, 76, 182);
-}
-
-@keyframes App-logo-float {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+.equ-card-textarea {
+  height: 100%;
+  width: 100%;
+  border-radius: 30px;
+  font-family: 'Rubik', sans-serif;
+  background-color: rgb(218, 218, 218);
+  padding: 1rem;
+  font-size: calc(0px + 2vmin);
+  outline: none;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
 }
