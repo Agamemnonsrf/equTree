@@ -5,10 +5,10 @@ import { Context } from './context/context';
 
 function App() {
   const [equations, setEquations] = React.useState([]);
-  const [equation, setEquation] = React.useState('');
-  const [result, setResult] = React.useState(0);
+
+  const [result, setResult] = React.useState('gwe gwe gwe');
   return (
-    <Context.Provider value={{ equations, setEquations, result, setResult, equation, setEquation }}>
+    <Context.Provider value={{ equations, setEquations, result, setResult }}>
       <header className='Header'><h2>{result}</h2></header>
       <Canvas />
     </Context.Provider>

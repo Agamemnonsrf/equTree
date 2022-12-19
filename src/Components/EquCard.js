@@ -4,12 +4,22 @@ import Draggable from 'react-draggable';
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import { Context } from "../context/context";
 import * as math from 'mathjs';
+import { useCaretPosition } from "react-use-caret-position";
+
 
 export const EquCard = () => {
     const { height, width } = useWindowDimensions();
-    const context = React.useContext(Context);
+    const moveBounds = { top: 10, left: 10, bottom: height - (height * 0.35), right: width - (width * 0.20) }
+    const defaultPosition = { x: 10, y: 10 }
 
-    const isValid = (str) => {
+    const context = React.useContext(Context);
+    const [innerHtml, setInnerhtml] = React.useState('');
+    const [equation, setEquation] = React.useState('');
+    const [caretPosition, setCaretPosition] = React.useState(0);
+    const nodeRef = React.useRef(null);
+    const spanRef = React.useRef(null);
+
+    const isValidEquation = (str) => {
         var invalidOperatorPairs = ["**", "*/", "/*", "//", "()", "^^", "^/", "/^", "^*", "*^", "-)", "+)", "*)", "/*", "^)", "-*", "-/", "-^", "+*", "+/", "+^", "(*", "(/", "(^", "/)", "*)", "+)", "-)", "^)"]
         str = "(" + str + ")";
         var open = 0;
@@ -42,24 +52,70 @@ export const EquCard = () => {
         return true;
     }
 
+    const getCaretPosition = (el) => {
+        if (window.getSelection && window.getSelection().getRangeAt) {
+            var range = window.getSelection().getRangeAt(0);
+            var selectedObj = window.getSelection();
+            var rangeCount = 0;
+            var childNodes = selectedObj.anchorNode.parentNode.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                if (childNodes[i] == selectedObj.anchorNode) {
+                    break;
+                }
+                if (childNodes[i].outerHTML)
+                    rangeCount += childNodes[i].outerHTML.length;
+                else if (childNodes[i].nodeType == 3) {
+                    rangeCount += childNodes[i].textContent.length;
+                }
+            }
+            return range.startOffset + rangeCount;
+        }
+        return -1;
+    }
+
+
     const handleEquationChange = (e) => {
-        const equation = e.currentTarget.textContent.replace(/\s/g, '');
-        if (isValid(equation)) {
-            context.setEquation(equation);
-        } else if (equation === '') { context.setResult(0) } else { console.log('skipped') }
+        const equationUnparsed = e.currentTarget.textContent;
+        const equationClean = equationUnparsed.replace(/\s/g, '');
+        if (e.nativeEvent.data === '(') {
+            const caret = getCaretPosition(e.currentTarget);
+            setCaretPosition(caret);
+            const split = equationUnparsed.slice(0, caret) + ')' + equationUnparsed.slice(caret);
+            setInnerhtml(split);
+
+        } else
+            if (isValidEquation(equationClean)) {
+                setEquation(equationClean);
+            } else if (equationClean === '') { context.setResult('0') } else { context.setResult('NaN') }
     }
 
 
     React.useEffect(() => {
-        const equation = math.parse(context.equation);
-        const result = equation.evaluate();
+        const equationParsed = math.parse(equation);
+        const result = equationParsed.evaluate();
         context.setResult(result)
-    }, [context.equation])
+    }, [equation])
+
+    React.useEffect(() => {
+        try {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            console.log(spanRef.current.childNodes)
+            range.setStart(spanRef.current.childNodes[0], caretPosition);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            spanRef.focus();
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }, [innerHtml])
 
     return (
-        <Draggable cancel={'.equ-card-textarea'} defaultPosition={{ x: 10, y: 10 }} bounds={{ top: 10, left: 10, bottom: height - (height * 0.35), right: width - (width * 0.20) }}>
-            <div className='equ-card'>
-                <b><span onInput={e => handleEquationChange(e)} contentEditable='true' className='equ-card-textarea'></span> = {context.result}</b>
+        <Draggable nodeRef={nodeRef} cancel={'.equ-card-textarea'} defaultPosition={defaultPosition} bounds={moveBounds}>
+            <div className='equ-card' ref={nodeRef}>
+                <b><span ref={spanRef} suppressContentEditableWarning onInput={e => handleEquationChange(e)} contentEditable='true' className='equ-card-textarea'>{innerHtml}</span> = {context.result}</b>
             </div>
         </Draggable>
     );

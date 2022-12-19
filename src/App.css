@@ -39,6 +39,10 @@
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
+.equ-card-textarea::selection {
+  background: lightslategray;
+}
+
 h2 {
   font-family: 'Rubik', sans-serif;
   font-size: calc(10px + 2vmin);
