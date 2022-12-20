@@ -2,9 +2,7 @@
   height: 15vh;
   width: 100%;
   background-color: rgb(255, 255, 255);
-
 }
-
 
 .canvas {
   height: 85vh;
@@ -12,7 +10,6 @@
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
   background-color: rgb(211, 211, 211);
 }
-
 
 .equ-card {
   min-height: 15vh;
@@ -31,9 +28,9 @@
   height: 100%;
   width: 100%;
   border-radius: 30px;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   background-color: rgb(218, 218, 218);
-  padding: 3vh;
+  padding: 2.5vh;
   font-size: calc(5px + 2vmin);
   outline: none;
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
@@ -44,7 +41,7 @@
 }
 
 h2 {
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: calc(10px + 2vmin);
   color: rgb(0, 0, 0);
   text-align: center;
