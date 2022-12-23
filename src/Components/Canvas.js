@@ -1,15 +1,15 @@
 import React from 'react';
 import '../App.css'
 import { EquCard } from './EquCard';
-import Draggable from 'react-draggable';
-import useWindowDimensions from '../hooks/useWindowDimensions';
+import { Context } from '../context/context';
 
 
 export const Canvas = () => {
-    const { height, width } = useWindowDimensions();
+    const context = React.useContext(Context);
     return (
         <div className='canvas' >
-            <EquCard />
+            {context.sections.map((section, index) => { return (<div key={section.id}><EquCard variable={section.value} id={section.id} /></div>) })}
+
         </div >
     );
 }
