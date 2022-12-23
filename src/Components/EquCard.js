@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import { Context } from "../context/context";
 import * as math from "mathjs";
+import uuid from "react-uuid";
 
 export const EquCard = () => {
   const { height, width } = useWindowDimensions();
@@ -19,6 +20,7 @@ export const EquCard = () => {
   const [innerHtml, setInnerhtml] = React.useState("");
   const [equation, setEquation] = React.useState("");
   const [caretPosition, setCaretPosition] = React.useState(0);
+  const [localSections, setLocalSections] = React.useState([]);
   const nodeRef = React.useRef(null);
   const spanRef = React.useRef(null);
 
@@ -80,10 +82,6 @@ export const EquCard = () => {
     //make it so that
     if (open !== 0) return false;
     var sections = str.split(/[\+\-\*\/\^\)\(]/g);
-    const that = sections.map((section) => {
-      return [section, Number(section), isFinite(section), isVariable(section)];
-    });
-    console.log(that);
     for (i = 0, len = sections.length; i < len; i++) {
       if (
         (sections[i].length > 0 &&
@@ -124,19 +122,18 @@ export const EquCard = () => {
     }
   };
 
-  const searchForVariables = (equation) => {
-    //regex that matches a sequence of letters
-    const variables = equation.match(/[a-z]+/g);
-    if (variables) {
-      const uniqueVariables = [...new Set(variables)];
-      console.log(uniqueVariables);
-    }
-  };
+  const getVariables = (str) => {
+    sections = str.split(/[\+\-\*\/\^\)\(]/g);
+    const variables = sections.filter((section) => isVariable(section)).map((section) => ({ value: section, id: uuid() }));
+    console.log(variables)
+    return variables;
+  }
 
   const handleEquationChange = (e) => {
     const equationUnparsed = e.currentTarget.textContent;
     const equationClean = equationUnparsed.replace(/\s/g, "");
     const inputData = e.nativeEvent.data;
+    setLocalSections(getVariables(equationClean));
 
     if (inputData === "(") {
       const caret = getCaretPosition(e.currentTarget);
@@ -145,7 +142,6 @@ export const EquCard = () => {
         equationUnparsed.slice(0, caret) + ")" + equationUnparsed.slice(caret);
       setInnerhtml(split);
     } else if (isValidEquation(equationClean)) {
-      searchForVariables(equationClean);
       setEquation(equationClean);
     } else if (equationClean === "") {
       context.setResult("0");
@@ -173,6 +169,12 @@ export const EquCard = () => {
       console.log("no caret position");
     }
   }, [innerHtml]);
+
+  React.useEffect(() => {
+    if (localSections.length > 0) {
+      context.setSections(localSections);
+    }
+  }, [localSections]);
 
   return (
     <Draggable
