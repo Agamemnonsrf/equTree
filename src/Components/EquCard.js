@@ -6,7 +6,7 @@ import { Context } from "../context/context";
 import * as math from "mathjs";
 import uuid from "react-uuid";
 
-export const EquCard = () => {
+export const EquCard = (props) => {
   const { height, width } = useWindowDimensions();
   const moveBounds = {
     top: 10,
@@ -21,6 +21,7 @@ export const EquCard = () => {
   const [equation, setEquation] = React.useState("");
   const [caretPosition, setCaretPosition] = React.useState(0);
   const [localSections, setLocalSections] = React.useState([]);
+  const [localResult, setLocalResult] = React.useState("");
   const nodeRef = React.useRef(null);
   const spanRef = React.useRef(null);
 
@@ -123,17 +124,22 @@ export const EquCard = () => {
   };
 
   const getVariables = (str) => {
-    sections = str.split(/[\+\-\*\/\^\)\(]/g);
-    const variables = sections.filter((section) => isVariable(section)).map((section) => ({ value: section, id: uuid() }));
-    console.log(variables)
-    return variables;
+    const sections = str.split(/[\+\-\*\/\^\)\(]/g);
+    const sectionsFiltered = sections.filter((section) => isVariable(section));
+    const variables = sectionsFiltered.map((section) => ({ value: section, id: uuid() }));
+    console.log("localSections: ", variables);
+    const localSetsCopy = [...props.localSets];
+    console.log("localSetsCopy: ", localSetsCopy);
+    localSetsCopy[props.index + 1] = variables;
+
+    props.setLocalSets(localSetsCopy);
   }
 
   const handleEquationChange = (e) => {
     const equationUnparsed = e.currentTarget.textContent;
     const equationClean = equationUnparsed.replace(/\s/g, "");
     const inputData = e.nativeEvent.data;
-    setLocalSections(getVariables(equationClean));
+    getVariables(equationClean);
 
     if (inputData === "(") {
       const caret = getCaretPosition(e.currentTarget);
@@ -153,7 +159,9 @@ export const EquCard = () => {
   React.useEffect(() => {
     const equationParsed = math.parse(equation);
     const result = equationParsed.evaluate();
-    context.setResult(result);
+    setLocalResult(result);
+    if (props.variable === 'first')
+      context.setResult(result);
   }, [equation]);
 
   React.useEffect(() => {
@@ -166,13 +174,12 @@ export const EquCard = () => {
       sel.addRange(range);
       spanRef.current.focus();
     } catch (error) {
-      console.log("no caret position");
     }
   }, [innerHtml]);
 
   React.useEffect(() => {
     if (localSections.length > 0) {
-      context.setSections(localSections);
+      context.setSections(prev => [...localSections]);
     }
   }, [localSections]);
 
@@ -183,7 +190,7 @@ export const EquCard = () => {
       defaultPosition={defaultPosition}
       bounds={moveBounds}
     >
-      <div className="equ-card" ref={nodeRef}>
+      <div className="equ-card" ref={nodeRef}>{props.variable} {''}
         <b>
           <span
             ref={spanRef}
@@ -198,7 +205,7 @@ export const EquCard = () => {
           </span>{" "}
           <span style={{ fontFamily: "Rubik, sansSerif" }}>
             {" "}
-            = {context.result}
+            = {localResult}
           </span>
         </b>
       </div>

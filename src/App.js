@@ -7,7 +7,7 @@ import uuid from 'react-uuid';
 function App() {
   const [equations, setEquations] = React.useState([]);
   const [result, setResult] = React.useState('');
-  const [sections, setSections] = React.useState([{ value: 'first', id: uuid() }]);
+  const [sections, setSections] = React.useState([{ value: 'first', textValue: '', id: uuid() }]);
 
   return (
     <Context.Provider value={{ equations, setEquations, result, setResult, sections, setSections }}>
