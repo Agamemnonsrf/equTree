@@ -7928,7 +7928,7 @@ react-dev-utils@^12.0.1:
     strip-ansi "^6.0.1"
     text-table "^0.2.0"
 
-react-dom@^18.2.0:
+react-dom@>=16.8.0, react-dom@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -8052,6 +8052,14 @@ react-stately@^3.20.0:
     "@react-stately/tree" "^3.4.1"
     "@react-types/shared" "^3.16.0"
 
+react-svg-connector@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/react-svg-connector/-/react-svg-connector-1.0.9.tgz#6cd7ded720de124a1d54176205910fc488d461ca"
+  integrity sha512-2vl50p94b0Ro4aTI/cVKDsLpSGE8jrMCvah/nY38jpjpWQqEvryrcxspd5R3eEaBq8W1p5PHSpl1Er5roUELPA==
+  dependencies:
+    react ">=16.8.0"
+    react-dom ">=16.8.0"
+
 react-use-caret-position@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/react-use-caret-position/-/react-use-caret-position-1.1.0.tgz#24755a3acdc5f04bd773deb120bb1d320eb3b47d"
@@ -8062,7 +8070,7 @@ react-uuid@^2.0.0:
   resolved "https://registry.yarnpkg.com/react-uuid/-/react-uuid-2.0.0.tgz#e3c97e190db9eef53cb9dacfcc7314d913a411fa"
   integrity sha512-FNUH/8WR/FEtx0Bu6gmt1eONfc413hhvrEXFWUSFGvznUhI4dYoVZA09p7JHoTpnM4WC2D/bG2YSxGKXF4oVLg==
 
-react@^18.2.0:
+react@>=16.8.0, react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

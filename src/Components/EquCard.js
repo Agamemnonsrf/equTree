@@ -129,28 +129,37 @@ export const EquCard = (props) => {
     const variables = sectionsFiltered.map((section) => ({
       value: section,
       id: uuid(),
+      parent: props.id,
     }))
     console.log('localSections: ', variables)
     const localSetsCopy = [...props.localSets]
     console.log('localSetsCopy: ', localSetsCopy)
     localSetsCopy[props.index + 1] = variables
-
     props.setLocalSets(localSetsCopy)
+  }
+
+  const containsVariables = (str) => {
+    const sections = str.split(/[\+\-\*\/\^\)\(]/g)
+    const sectionsFiltered = sections.filter((section) => isVariable(section))
+    if (sectionsFiltered.length > 0) {
+      return true
+    }
   }
 
   const handleEquationChange = (e) => {
     const equationUnparsed = e.currentTarget.textContent
     const equationClean = equationUnparsed.replace(/\s/g, '')
-    const inputData = e.nativeEvent.data
-    getVariables(equationClean)
+    //const inputData = e.nativeEvent.data
+    if (containsVariables(equationClean)) getVariables(equationClean)
 
-    if (inputData === '(') {
-      const caret = getCaretPosition(e.currentTarget)
-      setCaretPosition(caret)
-      const split =
-        equationUnparsed.slice(0, caret) + ')' + equationUnparsed.slice(caret)
-      setInnerhtml(split)
-    } else if (isValidEquation(equationClean)) {
+    // if (inputData === '(') {
+    //   const caret = getCaretPosition(e.currentTarget)
+    //   setCaretPosition(caret)
+    //   const split =
+    //     equationUnparsed.slice(0, caret) + ')' + equationUnparsed.slice(caret)
+    //   setInnerhtml(split)
+    // } else
+    if (isValidEquation(equationClean)) {
       setEquation(equationClean)
     } else if (equationClean === '') {
       context.setResult('0')
@@ -184,6 +193,12 @@ export const EquCard = (props) => {
     }
   }, [localSections])
 
+  React.useEffect(() => {
+    if (context.isEditing) {
+      spanRef.current.focus()
+    } else if (spanRef) handleEquationChange({ currentTarget: spanRef.current })
+  }, [context.isEditing])
+
   return (
     <Draggable
       nodeRef={nodeRef}
@@ -191,23 +206,25 @@ export const EquCard = (props) => {
       defaultPosition={defaultPosition}
       bounds={moveBounds}
     >
-      <div className="equ-card" ref={nodeRef}>
-        {''}
-        <div className="equCard-varBox">{props.variable}</div>
+      <div className="equ-card unselectable" ref={nodeRef}>
+        {props.index}
+        <div className="equCard-varBox unselectable">{props.variable}</div>
         <div className="coverUp" />
         <b>
           <span
             ref={spanRef}
             suppressContentEditableWarning
-            onInput={(e) => {
-              handleEquationChange(e)
-            }}
-            contentEditable="true"
+            contentEditable={context.isEditing}
             className="equ-card-textarea"
+            style={
+              context.isEditing
+                ? { backgroundColor: 'rgb(218, 218, 218)' }
+                : { backgroundColor: 'transparent' }
+            }
           >
             {innerHtml}
           </span>{' '}
-          <span className={'result'}> = {localResult}</span>
+          <span className="result unselectable"> = {localResult}</span>
         </b>
         {context.isEditing ? (
           <svg

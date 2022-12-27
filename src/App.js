@@ -8,7 +8,7 @@ function App() {
   const [equations, setEquations] = React.useState([])
   const [result, setResult] = React.useState('')
   const [sections, setSections] = React.useState([
-    { value: 'first', textValue: '', id: uuid() },
+    { value: 'root', textValue: '', id: uuid(), parent: null },
   ])
   const [isEditing, setIsEditing] = React.useState(false)
   return (
