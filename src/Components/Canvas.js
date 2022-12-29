@@ -3,13 +3,16 @@ import '../App.css'
 import { EquCard } from './EquCard'
 import { Context } from '../context/context'
 import Connector from 'react-svg-connector'
+import Tree, { useTreeState } from 'react-hyper-tree'
+
+const data = { name: 'root', id: 0, children: [] }
 
 export const Canvas = () => {
   const context = React.useContext(Context)
-  const [localSets, setLocalSets] = React.useState([[...context.sections]])
-  React.useEffect(() => {
-    context.setSections(localSets.flat())
-  }, [localSets])
+  const { required, handlers } = useTreeState({
+    data,
+    id: 'tree',
+  })
 
   //make a new ref when an EquCard is added
   const ref = React.useRef(null)
@@ -23,34 +26,17 @@ export const Canvas = () => {
     console.log(refs)
   }, [refs])
 
-  const findParent = (id) => {
-    const index = context.sections.findIndex((section) => section.id === id)
-    if (index === -1) return null
-    return refs[index].current
-  }
-
   return (
     <div className="canvas">
-      {context.sections.map((section, index) => {
-        return (
-          <div key={section.id} ref={refs[index]}>
-            <Connector
-              shape="narrow-s"
-              roundCorner
-              endArrow
-              el1={section.value === 'root' ? null : refs[index].current}
-              el2={findParent(section.parent)}
-            />
-            <EquCard
-              variable={section.value}
-              id={section.id}
-              setLocalSets={setLocalSets}
-              index={index}
-              localSets={localSets}
-            />
+      <Tree
+        {...required}
+        {...handlers}
+        renderNode={() => (
+          <div>
+            <EquCard />
           </div>
-        )
-      })}
+        )}
+      />
     </div>
   )
 }
