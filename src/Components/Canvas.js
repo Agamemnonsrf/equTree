@@ -3,7 +3,9 @@ import '../App.css'
 import { EquCard } from './EquCard'
 import { Context } from '../context/context'
 import { useTree } from '../hooks/useTree'
-import Xarrow, { useXarrow, Xwrapper } from 'react-xarrows'
+import { useXarrow, Xwrapper } from 'react-xarrows'
+import { CustomArrow } from './CustomArrow'
+import Draggable from 'react-draggable'
 
 export const Canvas = () => {
   const context = React.useContext(Context)
@@ -26,31 +28,27 @@ export const Canvas = () => {
 
   return (
     <div className="canvas">
-      <div className="canvas__equations">
-        {/* {tree1D.map((node) => {
+      <Xwrapper>
+        {tree1D.map((node) => {
           return (
-            <EquCard
-              key={node.id}
-              id={node.id}
-              variable={node.value}
-              parent={node.parent}
-              children={node.children}
-              addNode={addNode}
-              findNode={findNode}
-              removeNode={removeNode}
-              getSize={getSize}
-              resetTree={resetTree}
-              resetAndAdd={resetAndAdd}
-              resetChildrenStateful={resetChildrenStateful}
-            />
+            <>
+              <EquCard
+                key={node.id}
+                id={node.id}
+                variable={node.value}
+                parent={node.parent}
+                children={node.children}
+                addNode={addNode}
+                findNode={findNode}
+                resetTree={resetTree}
+                resetAndAdd={resetAndAdd}
+                resetChildrenStateful={resetChildrenStateful}
+              />
+              {node.parent && <CustomArrow start={node.parent} end={node.id} />}
+            </>
           )
-        })} */}
-        <Xwrapper>
-          <Xarrow start={'ooga'} end={'booga'} />
-          <EquCard variable="bruh" updateArrow={updateArrow} id="ooga" />
-          <EquCard variable="breh" updateArrow={updateArrow} id="booga" />
-        </Xwrapper>
-      </div>
+        })}
+      </Xwrapper>
     </div>
   )
 }

@@ -5,9 +5,11 @@ import useWindowDimensions from '../hooks/useWindowDimensions'
 import { Context } from '../context/context'
 import * as math from 'mathjs'
 import uuid from 'react-uuid'
+import { useXarrow, Xwrapper } from 'react-xarrows'
 
 export const EquCard = (props) => {
   const { height, width } = useWindowDimensions()
+  const updateArrow = useXarrow()
   const moveBounds = {
     top: 10,
     left: 10,
@@ -26,16 +28,14 @@ export const EquCard = (props) => {
   const spanRef = React.useRef(null)
 
   React.useEffect(() => {
-    const equationUnparsed = spanRef.current.innerHTML
-    const equationClean = equationUnparsed.replace(/\s/g, '')
     if (!context.isEditing) {
-      if (isValidEquation(equationClean)) {
-        setEquation(equationClean)
-      } else if (equationClean === '') {
-        context.setResult('0')
-      } else {
-        context.setResult('NaN')
-      }
+      const equationUnparsed = spanRef.current.innerHTML
+      const equationClean = equationUnparsed.replace(/\s/g, '')
+      const varsResults = props.resolveChildren(props.id)
+      varsResults.forEach((varPair) =>
+        equationClean.replace(varPair[0], varPair[1]),
+      )
+      setEquation(equationClean)
     }
   }, [context.isEditing])
 
@@ -196,30 +196,33 @@ export const EquCard = (props) => {
       cancel={'.equ-card-textarea'}
       defaultPosition={defaultPosition}
       bounds={moveBounds}
-      onDrag={props.updateXarrow}
-      onStop={props.updateXarrow}
+      onDrag={updateArrow}
+      onStop={updateArrow}
     >
-      <div className="equ-card unselectable" ref={nodeRef}>
+      <div className="equ-card unselectable" ref={nodeRef} id={props.id}>
         {props.index}
         <div className="equCard-varBox unselectable">{props.variable}</div>
         <div className="coverUp" />
-        <b>
-          <span
-            ref={spanRef}
-            suppressContentEditableWarning
-            contentEditable={context.isEditing}
-            className="equ-card-textarea"
-            style={
-              context.isEditing
-                ? { backgroundColor: 'rgb(218, 218, 218)' }
-                : { backgroundColor: 'transparent' }
-            }
-            onInput={handleEquationChange}
-          >
-            {innerHtml}
-          </span>{' '}
-          <span className="result unselectable"> = {localResult}</span>
-        </b>
+        <div style={{ textAlign: 'center' }}>
+          <b>
+            <span
+              ref={spanRef}
+              suppressContentEditableWarning
+              contentEditable={context.isEditing}
+              className="equ-card-textarea"
+              style={
+                context.isEditing
+                  ? { backgroundColor: 'rgb(218, 218, 218)' }
+                  : { backgroundColor: 'transparent' }
+              }
+              onInput={handleEquationChange}
+            >
+              {innerHtml}
+              {props.did}
+            </span>{' '}
+            <span className="result unselectable"> = {localResult}</span>
+          </b>
+        </div>
         {context.isEditing ? (
           <svg
             className="svg"
