@@ -10,7 +10,7 @@ function App() {
   const [sections, setSections] = React.useState([
     { value: 'root', textValue: '', id: uuid(), parent: null },
   ])
-  const [isEditing, setIsEditing] = React.useState(false)
+  const [isEditing, setIsEditing] = React.useState(true)
   return (
     <Context.Provider
       value={{

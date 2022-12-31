@@ -25,6 +25,39 @@ export const EquCard = (props) => {
   const nodeRef = React.useRef(null)
   const spanRef = React.useRef(null)
 
+  React.useEffect(() => {
+    const equationUnparsed = spanRef.current.innerHTML
+    const equationClean = equationUnparsed.replace(/\s/g, '')
+    if (!context.isEditing) {
+      if (isValidEquation(equationClean)) {
+        setEquation(equationClean)
+      } else if (equationClean === '') {
+        context.setResult('0')
+      } else {
+        context.setResult('NaN')
+      }
+    }
+  }, [context.isEditing])
+
+  React.useEffect(() => {
+    const equationParsed = math.parse(equation)
+    const result = equationParsed.evaluate()
+    setLocalResult(result)
+    if (props.variable === 'first') context.setResult(result)
+  }, [equation])
+
+  React.useEffect(() => {
+    try {
+      const range = document.createRange()
+      const sel = window.getSelection()
+      range.setStart(spanRef.current.childNodes[0], caretPosition)
+      range.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(range)
+      spanRef.current.focus()
+    } catch (error) {}
+  }, [innerHtml])
+
   const isValidEquation = (str) => {
     var invalidOperatorPairs = [
       '**',
@@ -126,16 +159,13 @@ export const EquCard = (props) => {
   const getVariables = (str) => {
     const sections = str.split(/[\+\-\*\/\^\)\(]/g)
     const sectionsFiltered = sections.filter((section) => isVariable(section))
-    const variables = sectionsFiltered.map((section) => ({
-      value: section,
-      id: uuid(),
-      parent: props.id,
-    }))
-    console.log('localSections: ', variables)
-    const localSetsCopy = [...props.localSets]
-    console.log('localSetsCopy: ', localSetsCopy)
-    localSetsCopy[props.index + 1] = variables
-    props.setLocalSets(localSetsCopy)
+    console.log(
+      `sectionsFiltered: ${[
+        sectionsFiltered,
+      ]} and type: ${typeof sectionsFiltered}`,
+    )
+    if (sectionsFiltered === []) props.resetChildrenStateful(props.id)
+    else props.resetAndAdd(sectionsFiltered, props.id)
   }
 
   const containsVariables = (str) => {
@@ -149,55 +179,16 @@ export const EquCard = (props) => {
   const handleEquationChange = (e) => {
     const equationUnparsed = e.currentTarget.textContent
     const equationClean = equationUnparsed.replace(/\s/g, '')
-    //const inputData = e.nativeEvent.data
-    if (containsVariables(equationClean)) getVariables(equationClean)
-
-    // if (inputData === '(') {
-    //   const caret = getCaretPosition(e.currentTarget)
-    //   setCaretPosition(caret)
-    //   const split =
-    //     equationUnparsed.slice(0, caret) + ')' + equationUnparsed.slice(caret)
-    //   setInnerhtml(split)
-    // } else
-    if (isValidEquation(equationClean)) {
-      setEquation(equationClean)
-    } else if (equationClean === '') {
-      context.setResult('0')
-    } else {
-      context.setResult('NaN')
+    const inputData = e.nativeEvent.data
+    getVariables(equationClean)
+    if (inputData === '(') {
+      const caret = getCaretPosition(e.currentTarget)
+      setCaretPosition(caret)
+      const split =
+        equationUnparsed.slice(0, caret) + ')' + equationUnparsed.slice(caret)
+      setInnerhtml(split)
     }
   }
-
-  React.useEffect(() => {
-    const equationParsed = math.parse(equation)
-    const result = equationParsed.evaluate()
-    setLocalResult(result)
-    if (props.variable === 'first') context.setResult(result)
-  }, [equation])
-
-  React.useEffect(() => {
-    try {
-      const range = document.createRange()
-      const sel = window.getSelection()
-      range.setStart(spanRef.current.childNodes[0], caretPosition)
-      range.collapse(true)
-      sel.removeAllRanges()
-      sel.addRange(range)
-      spanRef.current.focus()
-    } catch (error) {}
-  }, [innerHtml])
-
-  React.useEffect(() => {
-    if (localSections.length > 0) {
-      context.setSections((prev) => [...localSections])
-    }
-  }, [localSections])
-
-  React.useEffect(() => {
-    if (context.isEditing) {
-      spanRef.current.focus()
-    } else if (spanRef) handleEquationChange({ currentTarget: spanRef.current })
-  }, [context.isEditing])
 
   return (
     <Draggable
@@ -205,6 +196,8 @@ export const EquCard = (props) => {
       cancel={'.equ-card-textarea'}
       defaultPosition={defaultPosition}
       bounds={moveBounds}
+      onDrag={props.updateXarrow}
+      onStop={props.updateXarrow}
     >
       <div className="equ-card unselectable" ref={nodeRef}>
         {props.index}
@@ -221,6 +214,7 @@ export const EquCard = (props) => {
                 ? { backgroundColor: 'rgb(218, 218, 218)' }
                 : { backgroundColor: 'transparent' }
             }
+            onInput={handleEquationChange}
           >
             {innerHtml}
           </span>{' '}
