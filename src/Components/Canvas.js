@@ -13,15 +13,19 @@ export const Canvas = () => {
   const ref1 = React.useRef(null)
   const ref2 = React.useRef(null)
   const {
-    tree,
     tree1D,
     addNode,
     findNode,
-    removeNode,
-    getSize,
     resetTree,
     resetAndAdd,
     resetChildrenStateful,
+    isLeaf,
+    setResult,
+    resolveChildren,
+    addNodeStateful,
+    removeNode,
+    getNodeLevel,
+    getChildIndex,
   } = useTree()
 
   console.log(tree1D)
@@ -43,6 +47,13 @@ export const Canvas = () => {
                 resetTree={resetTree}
                 resetAndAdd={resetAndAdd}
                 resetChildrenStateful={resetChildrenStateful}
+                isLeaf={isLeaf}
+                setResult={setResult}
+                resolveChildren={resolveChildren}
+                addNodeStateful={addNodeStateful}
+                removeNode={removeNode}
+                getNodeLevel={getNodeLevel}
+                getChildIndex={getChildIndex}
               />
               {node.parent && <CustomArrow start={node.parent} end={node.id} />}
             </>

@@ -22,7 +22,6 @@
   font-size: calc(10px + 2vmin);
   min-width: 15vw;
   padding: 2vh;
-
   position: absolute;
 }
 
@@ -36,10 +35,8 @@
   font-size: calc(5px + 2vmin);
   outline: none;
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-  /* make it go up */
   position: relative;
   top: -8vh;
-  /*why is there no caret?*/
   caret-color: rgb(0, 0, 0);
   display: block;
   transition: background-color 0.3s ease-in-out;
@@ -66,7 +63,7 @@
   min-width: 17vw;
   height: 20px;
   border-top-right-radius: 30px;
-  border-top-left-radius: 30px;
+  border-top-left-radius: 15;
   translate: 0px -55px;
   background-color: white;
   position: relative;
@@ -95,6 +92,85 @@ h2 {
   margin: 20px;
   position: absolute;
   bottom: 0;
+  cursor: pointer;
+}
+
+.svg-right {
+  width: 17px;
+  height: 17px;
+  display: block;
+  stroke-width: 1;
+  stroke: rgb(170, 170, 170);
+  stroke-miterlimit: 10;
+  stroke-dashoffset: 0;
+  margin: 20px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: pointer;
+}
+
+.svg-right-middle {
+  width: 17px;
+  height: 17px;
+  display: block;
+  stroke-width: 1;
+  stroke: rgb(170, 170, 170);
+  stroke-miterlimit: 10;
+  stroke-dashoffset: 0;
+  margin: 20px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: pointer;
+  translate: 0px -200%;
+}
+
+.name-var-popup {
+  position: absolute;
+  translate: 15rem 00px;
+  width: auto;
+  height: 25%;
+  background-color: rgb(255, 255, 255);
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  border-radius: 30px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+  padding-right: 3rem;
+  padding-left: 1rem;
+}
+
+.name-var-popup-input {
+  width: auto;
+  height: 50%;
+  background-color: white;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
+  outline: none;
+  transition: 0.5s;
+  font-size: calc(2px + 2vmin);
+  padding: 0.3rem 1rem 0.1rem 1rem;
+  font-family: 'Rubik', sans-serif;
+  display: block;
+}
+
+.name-var-popup-input:focus {
+  background-color: rgb(218, 218, 218);
+}
+
+.svg-var-popup {
+  width: 17px;
+  height: 17px;
+  display: block;
+  stroke-width: 1;
+  stroke: rgb(170, 170, 170);
+  stroke-miterlimit: 10;
+  stroke-dashoffset: 0;
+  margin: 20px;
+  position: absolute;
+  right: 0;
   cursor: pointer;
 }
 
