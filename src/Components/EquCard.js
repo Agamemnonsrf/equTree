@@ -19,9 +19,8 @@ export const EquCard = (props) => {
   const defaultPosition = { x: 10, y: 10 }
 
   const context = React.useContext(Context)
-  const [innerHtml, setInnerhtml] = React.useState('')
+
   const [newVar, setNewVar] = React.useState('')
-  const [caretPosition, setCaretPosition] = React.useState(0)
   const [isNamingVar, setIsNamingVar] = React.useState(false)
   const [localResult, setLocalResult] = React.useState('')
   const [nameVarWarning, setNameVarWarning] = React.useState(false)
@@ -48,18 +47,6 @@ export const EquCard = (props) => {
       }
     }
   }, [context.isEditing])
-
-  React.useEffect(() => {
-    try {
-      const range = document.createRange()
-      const sel = window.getSelection()
-      range.setStart(spanRef.current.childNodes[0], caretPosition)
-      range.collapse(true)
-      sel.removeAllRanges()
-      sel.addRange(range)
-      spanRef.current.focus()
-    } catch (error) {}
-  }, [innerHtml])
 
   const isValidEquation = (str) => {
     var invalidOperatorPairs = [
@@ -116,7 +103,6 @@ export const EquCard = (props) => {
         }
       }
     }
-    //make it so that
     if (open !== 0) return false
     var sections = str.split(/[\+\-\*\/\^\)\(]/g)
     for (i = 0, len = sections.length; i < len; i++) {
@@ -129,27 +115,6 @@ export const EquCard = (props) => {
       }
     }
     return true
-  }
-
-  const getCaretPosition = (el) => {
-    if (window.getSelection && window.getSelection().getRangeAt) {
-      var range = window.getSelection().getRangeAt(0)
-      var selectedObj = window.getSelection()
-      var rangeCount = 0
-      var childNodes = selectedObj.anchorNode.parentNode.childNodes
-      for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i] === selectedObj.anchorNode) {
-          break
-        }
-        if (childNodes[i].outerHTML)
-          rangeCount += childNodes[i].outerHTML.length
-        else if (childNodes[i].nodeType == 3) {
-          rangeCount += childNodes[i].textContent.length
-        }
-      }
-      return range.startOffset + rangeCount
-    }
-    return -1
   }
 
   const isVariable = (str) => {
@@ -181,22 +146,15 @@ export const EquCard = (props) => {
   const handleEquationChange = (e) => {
     const equationUnparsed = e.currentTarget.textContent
     const equationClean = equationUnparsed.replace(/\s/g, '')
-    const inputData = e.nativeEvent.data
+
     if (props.isLeaf(props.id)) {
       if (isValidEquation(equationClean)) {
-        const equationParsed = math.parse(equationClean)
-        const result = equationParsed.evaluate()
+        const result = math.evaluate(equationClean)
         setLocalResult(result)
         props.setResult(props.id, result)
       }
     }
-    if (inputData === '(') {
-      const caret = getCaretPosition(e.currentTarget)
-      setCaretPosition(caret)
-      const split =
-        equationUnparsed.slice(0, caret) + ')' + equationUnparsed.slice(caret)
-      setInnerhtml(split)
-    }
+    handleChildrenStatus(equationClean)
   }
 
   const handleNameVar = (e) => {
@@ -207,18 +165,38 @@ export const EquCard = (props) => {
     }
   }
 
+  const handleChildrenStatus = (str) => {
+    if (containsVariables(str)) {
+      const vars = getVariables(str)
+      if (!props.childrenSatisfied(props.id, vars)) {
+        props.setChildrenStatus(false)
+      } else {
+        props.setChildrenStatus(true)
+      }
+    }
+  }
+
   const handleNameVarDone = () => {
     const breh = newVarRef.current.textContent
     if (breh === '') return
-    //only allow letters
     if (breh.match(/^[a-z]+$/g)) {
+      const equationUnparsed = spanRef.current.innerHTML
+      const equationClean = equationUnparsed.replace(/\s/g, '')
       props.addNodeStateful(props.id, breh)
       setIsNamingVar(false)
       setNameVarWarning(false)
+      handleChildrenStatus(equationClean)
     } else {
       setNameVarWarning(true)
     }
     setNewVar('')
+  }
+
+  const handleDelete = () => {
+    const equationUnparsed = spanRef.current.innerHTML
+    const equationClean = equationUnparsed.replace(/\s/g, '')
+    props.removeNode(props.id)
+    handleChildrenStatus(equationClean)
   }
 
   return (
@@ -229,7 +207,7 @@ export const EquCard = (props) => {
         props.variable === 'root'
           ? defaultPosition
           : {
-              x: props.getNodeLevel(props.id) * 300,
+              x: props.getNodeLevel(props.id) * 400,
               y: props.getChildIndex(props.id) * 200,
             }
       }
@@ -242,6 +220,11 @@ export const EquCard = (props) => {
         ref={nodeRef}
         id={props.id}
         key={props.id}
+        style={
+          !props.childrenStatus && {
+            boxShadow: '0 0 10px 5px rgba(255,0,0,1.0)',
+          }
+        }
       >
         {props.index}
         <div className="equCard-varBox unselectable">{props.variable}</div>
@@ -252,7 +235,7 @@ export const EquCard = (props) => {
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
             name="trashcan"
-            onClick={() => props.removeNode(props.id)}
+            onClick={() => handleDelete()}
           >
             <path d="M160 400C160 408.8 152.8 416 144 416C135.2 416 128 408.8 128 400V192C128 183.2 135.2 176 144 176C152.8 176 160 183.2 160 192V400zM240 400C240 408.8 232.8 416 224 416C215.2 416 208 408.8 208 400V192C208 183.2 215.2 176 224 176C232.8 176 240 183.2 240 192V400zM320 400C320 408.8 312.8 416 304 416C295.2 416 288 408.8 288 400V192C288 183.2 295.2 176 304 176C312.8 176 320 183.2 320 192V400zM317.5 24.94L354.2 80H424C437.3 80 448 90.75 448 104C448 117.3 437.3 128 424 128H416V432C416 476.2 380.2 512 336 512H112C67.82 512 32 476.2 32 432V128H24C10.75 128 0 117.3 0 104C0 90.75 10.75 80 24 80H93.82L130.5 24.94C140.9 9.357 158.4 0 177.1 0H270.9C289.6 0 307.1 9.358 317.5 24.94H317.5zM151.5 80H296.5L277.5 51.56C276 49.34 273.5 48 270.9 48H177.1C174.5 48 171.1 49.34 170.5 51.56L151.5 80zM80 432C80 449.7 94.33 464 112 464H336C353.7 464 368 449.7 368 432V128H80V432z" />
           </svg>
@@ -266,6 +249,7 @@ export const EquCard = (props) => {
             onClick={() => {
               setIsNamingVar(!isNamingVar)
               newVarRef.current.focus()
+
               console.log(newVarRef)
             }}
             name="plus"
@@ -273,38 +257,38 @@ export const EquCard = (props) => {
             <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
           </svg>
         )}
-        {isNamingVar && (
-          <div className="name-var-popup">
-            <b
-              className="name-var-popup-input"
-              contentEditable
-              onChange={handleNameVar}
-              ref={newVarRef}
-              suppressContentEditableWarning
-            >
-              <span
-                contentEditable
-                style={
-                  nameVarWarning
-                    ? { backgroundColor: 'red' }
-                    : { backgroundColor: 'white' }
-                }
-                suppressContentEditableWarning
-              >
-                {newVar}
-              </span>
-            </b>
-            <svg
-              className="svg-var-popup"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-              onClick={handleNameVarDone}
-              name="check"
-            >
-              <path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
-            </svg>
-          </div>
-        )}
+
+        <div
+          className="name-var-popup"
+          style={{ opacity: isNamingVar ? '1' : '0' }}
+        >
+          <span
+            className="name-var-popup-input"
+            tabIndex="1"
+            contentEditable
+            ref={newVarRef}
+            style={
+              nameVarWarning
+                ? { backgroundColor: 'red' }
+                : { backgroundColor: 'rgb(180, 180, 180)' }
+            }
+            suppressContentEditableWarning
+            onChange={handleNameVar}
+          >
+            {newVar}
+          </span>
+
+          <svg
+            className="svg-var-popup"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+            onClick={handleNameVarDone}
+            name="check"
+          >
+            <path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
+          </svg>
+        </div>
+
         <div style={{ textAlign: 'center' }}>
           <b>
             <span
@@ -318,17 +302,20 @@ export const EquCard = (props) => {
                   : { backgroundColor: 'transparent' }
               }
               onInput={handleEquationChange}
-            >
-              {innerHtml}
-              {props.did}
-            </span>{' '}
-            <span className="result unselectable"> = {localResult}</span>
+            ></span>
+
+            <span className="result unselectable">
+              {' '}
+              = {localResult ? localResult : '0'}
+            </span>
           </b>
         </div>
         {context.isEditing ? (
           <svg
             className="svg"
-            onClick={() => context.setIsEditing(!context.isEditing)}
+            onClick={() =>
+              props.childrenStatus && context.setIsEditing(!context.isEditing)
+            }
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             name="check"

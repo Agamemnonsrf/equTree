@@ -8,10 +8,7 @@ import { CustomArrow } from './CustomArrow'
 import Draggable from 'react-draggable'
 
 export const Canvas = () => {
-  const context = React.useContext(Context)
-  const updateArrow = useXarrow()
-  const ref1 = React.useRef(null)
-  const ref2 = React.useRef(null)
+  const [childrenStatus, setChildrenStatus] = React.useState(true)
   const {
     tree1D,
     addNode,
@@ -26,6 +23,7 @@ export const Canvas = () => {
     removeNode,
     getNodeLevel,
     getChildIndex,
+    childrenSatisfied,
   } = useTree()
 
   console.log(tree1D)
@@ -54,6 +52,9 @@ export const Canvas = () => {
                 removeNode={removeNode}
                 getNodeLevel={getNodeLevel}
                 getChildIndex={getChildIndex}
+                childrenSatisfied={childrenSatisfied}
+                childrenStatus={childrenStatus}
+                setChildrenStatus={setChildrenStatus}
               />
               {node.parent && <CustomArrow start={node.parent} end={node.id} />}
             </>
