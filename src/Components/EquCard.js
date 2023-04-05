@@ -11,10 +11,7 @@ export const EquCard = (props) => {
   const { height, width } = useWindowDimensions()
   const updateArrow = useXarrow()
   const moveBounds = {
-    top: 10,
-    left: 10,
-    bottom: height - height * 0.35,
-    right: width - width * 0.2,
+    top: 0,
   }
   const defaultPosition = { x: 10, y: 10 }
 
@@ -48,6 +45,7 @@ export const EquCard = (props) => {
     }
   }, [context.isEditing])
 
+  //ITS THIS GUY'S FAULT THAT I CANT SAY SQRT() IN THE EQUATION
   const isValidEquation = (str) => {
     var invalidOperatorPairs = [
       '**',
@@ -249,7 +247,6 @@ export const EquCard = (props) => {
             onClick={() => {
               setIsNamingVar(!isNamingVar)
               newVarRef.current.focus()
-
               console.log(newVarRef)
             }}
             name="plus"

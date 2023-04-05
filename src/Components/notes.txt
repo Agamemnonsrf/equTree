@@ -1,0 +1,6 @@
+a way to retain the state of children: basically you dont add and reset the variables everytime the user types.
+Instead, the user has to click an ADD VARIABLE button, and then when he clicks done editing, if the variable name he
+added doesnt exist inside the parent, he gets a warning to correct the variables in the parent, or delete the child
+
+
+also what if you 
