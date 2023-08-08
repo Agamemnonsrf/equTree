@@ -1,186 +1,192 @@
 .Header {
-  height: 15vh;
-  width: 100%;
-  background-color: rgb(255, 255, 255);
+    height: 15vh;
+    width: 100%;
+    background-color: rgb(255, 255, 255);
 }
 
 .canvas {
-  min-height: 85vh;
-  height: auto;
-  padding-top: 5vh;
-  width: 100%;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-  background-color: rgb(211, 211, 211);
+    min-height: 100vh;
+    height: auto;
+    width: 100%;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    background-color: rgb(211, 211, 211);
+    background-image: url("/public/grid-img.png");
+    background-repeat: repeat;
+    background-size: 100px 100px;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .equ-card {
-  min-height: 15vh;
-  display: inline-block;
-  background-color: white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-  border-radius: 30px;
-  font-size: calc(10px + 2vmin);
-  min-width: 15vw;
-  padding: 2vh;
-  position: absolute;
+    min-height: 15vh;
+    display: inline-block;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    border-radius: 30px;
+    font-size: calc(10px + 2vmin);
+    min-width: 15vw;
+    padding: 2vh;
+    position: absolute;
 }
 
 .equ-card-textarea {
-  height: 10px;
-  width: auto;
-  border-radius: 30px;
-  font-family: 'Rubik', sans-serif;
-  background-color: rgb(218, 218, 218);
-  padding: 2.5vh;
-  font-size: calc(5px + 2vmin);
-  outline: none;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-  position: relative;
-  top: -8vh;
-  caret-color: rgb(0, 0, 0);
-  display: block;
-  transition: background-color 0.3s ease-in-out;
+    height: 10px;
+    width: auto;
+    border-radius: 30px;
+    font-family: "Rubik", sans-serif;
+    background-color: rgb(218, 218, 218);
+    padding: 2.5vh;
+    font-size: calc(5px + 2vmin);
+    outline: none;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    position: relative;
+    top: -8vh;
+    caret-color: rgb(0, 0, 0);
+    display: block;
+    transition: background-color 0.3s ease-in-out;
 }
+
 .equCard-varBox {
-  font-family: 'Rubik', sans-serif;
-  width: auto;
-  display: inline-block;
-  padding-left: 25px;
-  padding-right: 25px;
-  padding-top: 5px;
-  height: 35px;
-  font-size: calc(5px + 2vmin);
-  background-color: white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-  border-top-right-radius: 30px;
-  border-top-left-radius: 30px;
-  position: relative;
-  translate: 0px -45px;
-  font-weight: bold;
+    font-family: "Rubik", sans-serif;
+    width: auto;
+    display: inline-block;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 5px;
+    height: 35px;
+    font-size: calc(5px + 2vmin);
+    background-color: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    border-top-right-radius: 30px;
+    border-top-left-radius: 30px;
+    position: relative;
+    translate: 0px -45px;
+    font-weight: bold;
 }
 
 .coverUp {
-  min-width: 17vw;
-  height: 20px;
-  border-top-right-radius: 30px;
-  border-top-left-radius: 15;
-  translate: 0px -55px;
-  background-color: white;
-  position: relative;
+    min-width: 17vw;
+    height: 20px;
+    border-top-right-radius: 30px;
+    border-top-left-radius: 15;
+    translate: 0px -55px;
+    background-color: white;
+    position: relative;
 }
 
 .equ-card-textarea::selection {
-  background: lightslategray;
+    background: lightslategray;
 }
 
 h2 {
-  font-family: 'Rubik', sans-serif;
-  font-size: calc(10px + 2vmin);
-  color: rgb(0, 0, 0);
-  text-align: center;
-  margin: 10px;
+    font-family: "Rubik", sans-serif;
+    font-size: calc(10px + 2vmin);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    margin: 10px;
 }
 
 .svg {
-  width: 17px;
-  height: 17px;
-  display: block;
-  stroke-width: 1;
-  stroke: rgb(170, 170, 170);
-  stroke-miterlimit: 10;
-  stroke-dashoffset: 0;
-  margin: 20px;
-  position: absolute;
-  bottom: 0;
-  cursor: pointer;
+    width: 17px;
+    height: 17px;
+    display: block;
+    stroke-width: 1;
+    stroke: rgb(170, 170, 170);
+    stroke-miterlimit: 10;
+    stroke-dashoffset: 0;
+    margin: 20px;
+    position: absolute;
+    bottom: 0;
+    cursor: pointer;
 }
 
 .svg-right {
-  width: 17px;
-  height: 17px;
-  display: block;
-  stroke-width: 1;
-  stroke: rgb(170, 170, 170);
-  stroke-miterlimit: 10;
-  stroke-dashoffset: 0;
-  margin: 20px;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  cursor: pointer;
+    width: 17px;
+    height: 17px;
+    display: block;
+    stroke-width: 1;
+    stroke: rgb(170, 170, 170);
+    stroke-miterlimit: 10;
+    stroke-dashoffset: 0;
+    margin: 20px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    cursor: pointer;
 }
 
 .svg-right-middle {
-  width: 17px;
-  height: 17px;
-  display: block;
-  stroke-width: 1;
-  stroke: rgb(170, 170, 170);
-  stroke-miterlimit: 10;
-  stroke-dashoffset: 0;
-  margin: 20px;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  cursor: pointer;
-  translate: 0px -200%;
+    width: 17px;
+    height: 17px;
+    display: block;
+    stroke-width: 1;
+    stroke: rgb(170, 170, 170);
+    stroke-miterlimit: 10;
+    stroke-dashoffset: 0;
+    margin: 20px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    cursor: pointer;
+    translate: 0px -200%;
 }
 
 .name-var-popup {
-  position: absolute;
-  translate: 15rem 00px;
-  width: auto;
-  height: 25%;
-  background-color: rgb(255, 255, 255);
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  border-radius: 30px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-  padding-right: 3rem;
-  padding-left: 1rem;
+    position: absolute;
+    translate: 15rem 00px;
+    width: auto;
+    height: 25%;
+    background-color: rgb(255, 255, 255);
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    border-radius: 30px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    padding-right: 3rem;
+    padding-left: 1rem;
 }
 
 .name-var-popup-input {
-  width: auto;
-  height: 50%;
-  background-color: rgb(180, 180, 180);
-  border-radius: 30px;
-  text-align: center;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
-  outline: none;
-  transition: 0.5s;
-  font-size: calc(2px + 2vmin);
-  padding: 0.4rem 1rem 0.4rem 1rem;
-  font-family: 'Rubik', sans-serif;
+    width: auto;
+    height: 50%;
+    background-color: rgb(180, 180, 180);
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
+    outline: none;
+    transition: 0.5s;
+    font-size: calc(2px + 2vmin);
+    padding: 0.4rem 1rem 0.4rem 1rem;
+    font-family: "Rubik", sans-serif;
 }
 
 .svg-var-popup {
-  width: 17px;
-  height: 17px;
-  display: block;
-  stroke-width: 1;
-  stroke: rgb(170, 170, 170);
-  stroke-miterlimit: 10;
-  stroke-dashoffset: 0;
-  margin: 20px;
-  position: absolute;
-  right: 0;
-  cursor: pointer;
+    width: 17px;
+    height: 17px;
+    display: block;
+    stroke-width: 1;
+    stroke: rgb(170, 170, 170);
+    stroke-miterlimit: 10;
+    stroke-dashoffset: 0;
+    margin: 20px;
+    position: absolute;
+    right: 0;
+    cursor: pointer;
 }
 
 .result {
-  /* no selection */
-  top: -8vh;
-  position: relative;
+    /* no selection */
+    top: -8vh;
+    position: relative;
 }
 
 .unselectable {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Old versions of Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Non-prefixed version, currently
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
                         supported by Chrome, Opera and Firefox */
 }
