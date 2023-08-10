@@ -15,12 +15,19 @@ export const Canvas = () => {
         <div className="canvas">
             <TransformWrapper
                 limitToBounds={false}
-                panning={{ disabled: isDragging }}
+                panning={{
+                    disabled: isDragging,
+                    excluded: ["equ-card-textarea", "name-var-popup-input"],
+                }}
                 maxScale={2}
+                minScale={0.3}
                 doubleClick={{ disabled: true }}
             >
                 <TransformComponent
-                    wrapperStyle={{ minHeight: "100vh", minWidth: "100vw" }}
+                    wrapperStyle={{
+                        height: "100vh",
+                        width: "100vw",
+                    }}
                 >
                     <EquCard
                         key={defaultTree[0].id}

@@ -4,10 +4,11 @@
     background-color: rgb(255, 255, 255);
 }
 
+* {
+    pointer-events: all;
+}
+
 .canvas {
-    min-height: 100vh;
-    height: auto;
-    width: 100%;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
     background-color: rgb(211, 211, 211);
     background-image: url("/public/grid-img.png");
@@ -18,16 +19,24 @@
     overflow: hidden;
 }
 
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+
 .equ-card {
     min-height: 15vh;
-    display: inline-block;
     background-color: white;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
     border-radius: 30px;
     font-size: calc(10px + 2vmin);
     min-width: 15vw;
     padding: 2vh;
-    position: absolute;
+    position: relative;
+    z-index: 10;
 }
 
 .equ-card-textarea {

@@ -44,6 +44,7 @@ export const EquCard = (props) => {
     const [nameVarWarning, setNameVarWarning] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(true);
     const [isEditingBranch, setIsEditingBranch] = React.useState(true);
+    const [isSpanRefFocused, setIsSpanRefFocused] = React.useState(false);
     const nodeRef = React.useRef(null);
     const spanRef = React.useRef(null);
     const newVarRef = React.useRef(null);
@@ -324,7 +325,9 @@ export const EquCard = (props) => {
                                     : { backgroundColor: "rgb(180, 180, 180)" }
                             }
                             suppressContentEditableWarning
+                            onClick={() => newVarRef.current.focus()}
                             onChange={handleNameVar}
+                            //New Var Popup
                         >
                             {newVar}
                         </span>
@@ -349,14 +352,23 @@ export const EquCard = (props) => {
                                 className="equ-card-textarea"
                                 style={
                                     isEditing
-                                        ? {
-                                              backgroundColor:
-                                                  "rgb(218, 218, 218)",
-                                          }
+                                        ? isSpanRefFocused
+                                            ? {
+                                                  backgroundColor:
+                                                      "rgb(200,200,200)",
+                                              }
+                                            : {
+                                                  backgroundColor:
+                                                      "rgb(218, 218, 218)",
+                                              }
                                         : { backgroundColor: "transparent" }
                                 }
-                                onClick={() => console.log("a")}
+                                onClick={() => {
+                                    setIsSpanRefFocused(true);
+                                }}
+                                onBlur={() => setIsSpanRefFocused(false)}
                                 onInput={handleEquationChange}
+                                //Equation Input Span
                             ></span>
 
                             <span className="result unselectable">
