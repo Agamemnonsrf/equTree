@@ -1,16 +1,21 @@
 import React from "react";
 import "../App.css";
 import { EquCard } from "./EquCard";
-import { Context } from "../context/context";
 import { useTree } from "../hooks/useTree";
 import { useXarrow, Xwrapper } from "react-xarrows";
 import { CustomArrow } from "./CustomArrow";
 import Draggable from "react-draggable";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import {
+    TransformWrapper,
+    TransformComponent,
+    getTransformStyles,
+    useTransformContext,
+} from "react-zoom-pan-pinch";
 
 export const Canvas = () => {
     const { defaultTree, getChildren } = useTree();
     const [isDragging, setIsDragging] = React.useState(false);
+
     return (
         <div className="canvas">
             <TransformWrapper
