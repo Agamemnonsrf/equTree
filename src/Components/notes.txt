@@ -1,3 +1,3 @@
-1) fix Xarrow scale
-2) fix Draggable velocity scale
-3) ideally the grid background should also move on panning
+1) fix Xarrow scale done
+2) fix Draggable velocity scale done
+3) ideally the grid background should also move on panning , done

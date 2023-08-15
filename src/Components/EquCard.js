@@ -1,8 +1,7 @@
 import React from "react";
 import "../App.css";
 import Draggable from "react-draggable";
-import useWindowDimensions from "../hooks/useWindowDimensions";
-import { Context } from "../context/context";
+
 import * as math from "mathjs";
 import { useXarrow, Xwrapper } from "react-xarrows";
 import { CustomArrow } from "./CustomArrow";
@@ -13,12 +12,6 @@ export const EquCard = (props) => {
     const [arrowTrigger, setArrowTrigger] = React.useState(false);
     const [childrenStatus, setChildrenStatus] = React.useState(true);
     const {
-        tree1D,
-        addNode,
-        findNode,
-        resetTree,
-        resetAndAdd,
-        resetChildrenStateful,
         isLeaf,
         setResult,
         resolveChildren,
@@ -29,11 +22,7 @@ export const EquCard = (props) => {
         childrenSatisfied,
         getChildren,
     } = useTree();
-    const { height, width } = useWindowDimensions();
     const updateArrow = useXarrow();
-    const moveBounds = {
-        top: 0,
-    };
     const defaultPosition = { x: 10, y: 10 };
 
     const transformContext = useTransformContext();
@@ -150,7 +139,7 @@ export const EquCard = (props) => {
     };
 
     const isVariable = (str) => {
-        const match = str.match(/^[a-z]+$/g);
+        const match = str.match(/^[a-zA-Z]+$/g);
         if (match) {
             return true;
         }
@@ -195,8 +184,8 @@ export const EquCard = (props) => {
 
     const handleNameVar = (e) => {
         const name = e.currentTarget.textContent;
-        //allow only letters
-        if (name.match(/^[a-z]+$/g)) {
+        //allow only letters and capital letters
+        if (name.match(/^[a-zA-Z]+$/g)) {
             setNewVar(name);
         }
     };
@@ -204,10 +193,10 @@ export const EquCard = (props) => {
     const handleChildrenStatus = (str) => {
         if (containsVariables(str)) {
             const vars = getVariables(str);
-            if (!childrenSatisfied(props.id, vars)) {
-                setChildrenStatus(false);
-            } else {
+            if (childrenSatisfied(props.id, vars)) {
                 setChildrenStatus(true);
+            } else {
+                setChildrenStatus(false);
             }
         }
     };
@@ -215,7 +204,7 @@ export const EquCard = (props) => {
     const handleNameVarDone = () => {
         const breh = newVarRef.current.textContent;
         if (breh === "") return;
-        if (breh.match(/^[a-z]+$/g)) {
+        if (breh.match(/^[a-zA-Z]+$/g)) {
             const equationUnparsed = spanRef.current.innerHTML;
             const equationClean = equationUnparsed.replace(/\s/g, "");
             addNodeStateful(props.id, breh);
@@ -238,8 +227,9 @@ export const EquCard = (props) => {
     return (
         <>
             <Draggable
+                scale={transformContext.transformState.scale}
                 nodeRef={nodeRef}
-                cancel={".equ-card-textarea"}
+                cancel={".equ-card-textarea, .name-var-popup "}
                 defaultPosition={
                     props.variable === "root"
                         ? defaultPosition
@@ -304,11 +294,9 @@ export const EquCard = (props) => {
                         </svg>
                     )}
                     <div
-                        className="name-var-popup"
-                        style={{
-                            opacity: isNamingVar ? "1" : "0",
-                            zIndex: "9",
-                        }}
+                        className={`name-var-popup ${
+                            isNamingVar ? "expand" : "close"
+                        }`}
                     >
                         <span
                             className="name-var-popup-input"
@@ -358,7 +346,7 @@ export const EquCard = (props) => {
                                               }
                                         : { backgroundColor: "transparent" }
                                 }
-                                onClick={() => {
+                                onFocus={() => {
                                     setIsSpanRefFocused(true);
                                 }}
                                 onBlur={() => setIsSpanRefFocused(false)}
@@ -419,6 +407,7 @@ export const EquCard = (props) => {
                         start={props.id}
                         end={child.id}
                         scale={transformContext.transformState.scale}
+                        key={child.id + props.id}
                     />
                 );
             })}

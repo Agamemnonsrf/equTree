@@ -37,6 +37,7 @@
     padding: 2vh;
     position: relative;
     z-index: 10;
+    transform-style: preserve-3d;
 }
 
 .equ-card-textarea {
@@ -143,8 +144,7 @@ h2 {
 
 .name-var-popup {
     position: absolute;
-    translate: 15rem 00px;
-    width: auto;
+    transition: translate 0.3s;
     height: 25%;
     background-color: rgb(255, 255, 255);
     justify-content: center;
@@ -154,6 +154,16 @@ h2 {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
     padding-right: 3rem;
     padding-left: 1rem;
+    z-index: 0;
+    transform: translateZ(-1px);
+}
+
+.expand {
+    translate: 15.5rem 0;
+}
+
+.close {
+    translate: 0 0;
 }
 
 .name-var-popup-input {
