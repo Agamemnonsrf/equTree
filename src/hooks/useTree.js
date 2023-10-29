@@ -23,7 +23,6 @@ export const useTree = () => {
             result: 0,
         };
         const parent = findNode(toParent, newTree);
-        console.log(`parent: ${parent}`);
         parent.children.push(newNode);
         setTree(newTree);
     };
@@ -38,7 +37,6 @@ export const useTree = () => {
             result: 0,
         };
         const parent = findNode(toParent, newTree);
-        console.log(`parent: ${parent}`);
         parent.children.push(newNode);
         setTree(newTree);
     };
@@ -96,7 +94,6 @@ export const useTree = () => {
             { id: uuid(), value: "root", parent: null, children: [] },
         ];
         setTree(defaultTreed);
-        console.log(`resetting tree`);
     };
 
     const resetAndAdd = (nodes, to) => {

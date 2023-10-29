@@ -6,6 +6,7 @@
 
 * {
     pointer-events: all;
+    transform: translateZ(0);
 }
 
 .canvas {
@@ -19,21 +20,13 @@
     overflow: hidden;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-}
-
 .equ-card {
-    min-height: 15vh;
+    min-height: 150px;
     background-color: white;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
     border-radius: 30px;
     font-size: calc(10px + 2vmin);
-    min-width: 15vw;
+    min-width: 230px;
     padding: 2vh;
     position: relative;
     z-index: 10;
@@ -41,20 +34,23 @@
 }
 
 .equ-card-textarea {
-    height: 10px;
+    height: auto;
+    min-width: 90%;
     width: auto;
-    border-radius: 30px;
+    border-radius: 30px !important;
     font-family: "Rubik", sans-serif;
     background-color: rgb(218, 218, 218);
-    padding: 2.5vh;
+    padding: 10px;
     font-size: calc(5px + 2vmin);
-    outline: none;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-    position: relative;
-    top: -8vh;
+    outline: none !important;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3) !important;
     caret-color: rgb(0, 0, 0);
-    display: block;
-    transition: background-color 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+.equ-card-textarea:focus {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7) !important;
+    background-color: rgb(255, 255, 255);
 }
 
 .equCard-varBox {
@@ -144,8 +140,9 @@ h2 {
 
 .name-var-popup {
     position: absolute;
-    transition: translate 0.3s;
+    transition: all 0.3s;
     height: 25%;
+    left: 0;
     background-color: rgb(255, 255, 255);
     justify-content: center;
     align-items: center;
@@ -159,15 +156,12 @@ h2 {
 }
 
 .expand {
-    translate: 15.5rem 0;
-}
-
-.close {
-    translate: 0 0;
+    left: 105%;
 }
 
 .name-var-popup-input {
     width: auto;
+    min-width: 30px;
     height: 50%;
     background-color: rgb(180, 180, 180);
     border-radius: 30px;
@@ -196,7 +190,6 @@ h2 {
 
 .result {
     /* no selection */
-    top: -8vh;
     position: relative;
 }
 
