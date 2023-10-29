@@ -3,6 +3,7 @@ import { Canvas } from "./Components/Canvas";
 import "./App.css";
 import { Context } from "./context/context";
 import uuid from "react-uuid";
+import { SideBar } from "./Components/SideBar";
 
 function App() {
     const [equations, setEquations] = React.useState([]);
@@ -22,6 +23,7 @@ function App() {
                 setSections,
             }}
         >
+            <SideBar />
             <Canvas />
         </Context.Provider>
     );

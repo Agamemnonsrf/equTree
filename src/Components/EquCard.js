@@ -7,10 +7,14 @@ import { useXarrow, Xwrapper } from "react-xarrows";
 import { CustomArrow } from "./CustomArrow";
 import { useTree } from "../hooks/useTree";
 import { useTransformContext } from "react-zoom-pan-pinch";
+import { addStyles, EditableMathField } from "react-mathquill";
+
+addStyles();
 
 export const EquCard = (props) => {
     const [arrowTrigger, setArrowTrigger] = React.useState(false);
     const [childrenStatus, setChildrenStatus] = React.useState(true);
+    const [latex, setLatex] = React.useState("");
     const {
         isLeaf,
         setResult,
@@ -23,7 +27,7 @@ export const EquCard = (props) => {
         getChildren,
     } = useTree();
     const updateArrow = useXarrow();
-    const defaultPosition = { x: 10, y: 10 };
+    const defaultPosition = { x: 200, y: 100 };
 
     const transformContext = useTransformContext();
     const [newVar, setNewVar] = React.useState("");
@@ -43,7 +47,7 @@ export const EquCard = (props) => {
 
     React.useEffect(() => {
         if (!isEditing) {
-            const equationUnparsed = spanRef.current.innerHTML;
+            const equationUnparsed = latexToEquation(latex);
             const equationClean = equationUnparsed.replace(/\s/g, "");
             //first try making it so that when done editing the root, its children also get
             //stopped editing, try that with the updateArrow method, But make sure that
@@ -54,7 +58,6 @@ export const EquCard = (props) => {
                 varsResults.forEach((varPair) => {
                     scope[varPair[0]] = varPair[1];
                 });
-                console.log(`scope: ${JSON.stringify(scope)}`);
                 const equationParsed = math.compile(equationClean);
                 const result = equationParsed.evaluate(scope);
                 setLocalResult(result);
@@ -66,7 +69,7 @@ export const EquCard = (props) => {
 
     //ITS THIS GUY'S FAULT THAT I CANT SAY SQRT() IN THE EQUATION
     const isValidEquation = (str) => {
-        var invalidOperatorPairs = [
+        const invalidOperatorPairs = [
             "**",
             "*/",
             "/*",
@@ -97,36 +100,54 @@ export const EquCard = (props) => {
             "-)",
             "^)",
         ];
-        str = "(" + str + ")";
-        var open = 0;
-        for (var i = 0, len = str.length; i < len; i++) {
-            var curr = str[i];
+
+        const functionNames = ["sqrt"];
+
+        const functionRegex = new RegExp(
+            `(${functionNames.join("|")})\\(`,
+            "g"
+        );
+
+        const equation = `(${str})`.replace(functionRegex, "1");
+
+        let open = 0;
+
+        for (let i = 0, len = equation.length; i < len; i++) {
+            const curr = equation[i];
+
             if (curr === "(") {
                 open += 1;
             } else if (curr === ")") {
                 open -= 1;
+
                 if (open < 0) {
                     return false;
                 }
             }
+
             if (i > 0) {
                 for (
-                    var j = 0, oplen = invalidOperatorPairs.length;
+                    let j = 0, oplen = invalidOperatorPairs.length;
                     j < oplen;
                     j++
                 ) {
                     if (
-                        str[i - 1] == invalidOperatorPairs[j][0] &&
-                        curr == invalidOperatorPairs[j][1]
+                        equation[i - 1] === invalidOperatorPairs[j][0] &&
+                        curr === invalidOperatorPairs[j][1]
                     ) {
                         return false;
                     }
                 }
             }
         }
-        if (open !== 0) return false;
-        var sections = str.split(/[\+\-\*\/\^\)\(]/g);
-        for (i = 0, len = sections.length; i < len; i++) {
+
+        if (open !== 0) {
+            return false;
+        }
+
+        const sections = equation.split(/[\+\-\*\/\^\)\(]/g);
+
+        for (let i = 0, len = sections.length; i < len; i++) {
             if (
                 (sections[i].length > 0 &&
                     !(Number(sections[i]) !== NaN && isFinite(sections[i]))) ||
@@ -135,6 +156,7 @@ export const EquCard = (props) => {
                 return false;
             }
         }
+
         return true;
     };
 
@@ -150,11 +172,7 @@ export const EquCard = (props) => {
         const sectionsFiltered = sections.filter((section) =>
             isVariable(section)
         );
-        console.log(
-            `sectionsFiltered: ${[
-                sectionsFiltered,
-            ]} and type: ${typeof sectionsFiltered}`
-        );
+
         return sectionsFiltered;
     };
 
@@ -169,16 +187,15 @@ export const EquCard = (props) => {
     };
 
     const handleEquationChange = (e) => {
-        const equationUnparsed = e.currentTarget.textContent;
-        const equationClean = equationUnparsed.replace(/\s/g, "");
+        const equationClean = e.replace(/\s/g, "");
 
-        if (isLeaf(props.id)) {
-            if (isValidEquation(equationClean)) {
-                const result = math.evaluate(equationClean);
-                setLocalResult(result);
-                setResult(props.id, result);
-            }
+        if (isValidEquation(equationClean)) {
+            const result = math.evaluate(equationClean);
+            setLocalResult(result);
+            setResult(props.id, result);
+            console.log("resolving success");
         }
+
         handleChildrenStatus(equationClean);
     };
 
@@ -198,6 +215,8 @@ export const EquCard = (props) => {
             } else {
                 setChildrenStatus(false);
             }
+        } else {
+            setChildrenStatus(true);
         }
     };
 
@@ -205,7 +224,7 @@ export const EquCard = (props) => {
         const breh = newVarRef.current.textContent;
         if (breh === "") return;
         if (breh.match(/^[a-zA-Z]+$/g)) {
-            const equationUnparsed = spanRef.current.innerHTML;
+            const equationUnparsed = latexToEquation(latex);
             const equationClean = equationUnparsed.replace(/\s/g, "");
             addNodeStateful(props.id, breh);
             setIsNamingVar(false);
@@ -218,18 +237,50 @@ export const EquCard = (props) => {
     };
 
     const handleDelete = () => {
-        const equationUnparsed = spanRef.current.innerHTML;
+        const equationUnparsed = latexToEquation(latex);
         const equationClean = equationUnparsed.replace(/\s/g, "");
         removeNode(props.id);
         handleChildrenStatus(equationClean);
     };
 
+    const latexToEquation = (latex) => {
+        const equation = latex
+            .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "($1)/($2)")
+            .replace(/\\sqrt\{([^}]+)\}/g, "sqrt($1)")
+            .replace(/\\left/g, "")
+            .replace(/\\right/g, "")
+            .replace(/\\cdot/g, "*")
+            .replace(/\\times/g, "*")
+            .replace(/\\div/g, "/")
+            .replace(/\\pm/g, "+-")
+            .replace(/\\mp/g, "-+")
+            .replace(/\\pi/g, "pi")
+            .replace(/\\infty/g, "Infinity")
+            .replace(/\\sin/g, "sin")
+            .replace(/\\cos/g, "cos")
+            .replace(/\\tan/g, "tan")
+            .replace(/\\cot/g, "cot")
+            .replace(/\\sec/g, "sec")
+            .replace(/\\csc/g, "csc")
+            .replace(/\\log/g, "log")
+            .replace(/\\ln/g, "ln")
+            .replace(/\\exp/g, "exp")
+            .replace(/\\abs/g, "abs")
+            .replace(/\\frac/g, "frac")
+            .replace(/(\d+)\^(\d+)/g, "($1^$2)")
+            .replace(/{/g, "(")
+            .replace(/}/g, ")");
+
+        return equation;
+    };
     return (
         <>
             <Draggable
                 scale={transformContext.transformState.scale}
                 nodeRef={nodeRef}
-                cancel={".equ-card-textarea, .name-var-popup "}
+                cancel={
+                    ".equ-card-textarea, .equ-card-textarea-container, .name-var-popup"
+                }
                 defaultPosition={
                     props.variable === "root"
                         ? defaultPosition
@@ -286,7 +337,6 @@ export const EquCard = (props) => {
                             onClick={() => {
                                 setIsNamingVar(!isNamingVar);
                                 newVarRef.current.focus();
-                                console.log(newVarRef);
                             }}
                             name="plus"
                         >
@@ -294,9 +344,7 @@ export const EquCard = (props) => {
                         </svg>
                     )}
                     <div
-                        className={`name-var-popup ${
-                            isNamingVar ? "expand" : "close"
-                        }`}
+                        className={`name-var-popup ${isNamingVar && "expand"}`}
                     >
                         <span
                             className="name-var-popup-input"
@@ -326,39 +374,48 @@ export const EquCard = (props) => {
                             <path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
                         </svg>
                     </div>
-                    <div style={{ textAlign: "center" }}>
-                        <b>
-                            <span
-                                ref={spanRef}
-                                suppressContentEditableWarning
-                                contentEditable={isEditing}
-                                className="equ-card-textarea"
-                                style={
-                                    isEditing
-                                        ? isSpanRefFocused
-                                            ? {
-                                                  backgroundColor:
-                                                      "rgb(200,200,200)",
-                                              }
-                                            : {
-                                                  backgroundColor:
-                                                      "rgb(218, 218, 218)",
-                                              }
-                                        : { backgroundColor: "transparent" }
-                                }
-                                onFocus={() => {
-                                    setIsSpanRefFocused(true);
-                                }}
-                                onBlur={() => setIsSpanRefFocused(false)}
-                                onInput={handleEquationChange}
-                                //Equation Input Span
-                            ></span>
+                    <div
+                        className="equ-card-textarea-container"
+                        style={{
+                            textAlign: "center",
+                            position: "relative",
+                            height: "auto",
+                            minWidth: " 60%",
+                            width: "auto",
+                            left: "0px",
+                            bottom: "50px",
+                            right: "0px",
+                        }}
+                    >
+                        <EditableMathField
+                            latex={latex}
+                            ref={spanRef}
+                            suppressContentEditableWarning
+                            contentEditable={isEditing}
+                            className="equ-card-textarea"
+                            style={{
+                                backgroundColor: isEditing
+                                    ? isSpanRefFocused
+                                        ? "rgb(200, 200, 200)"
+                                        : "rgb(218, 218, 218)"
+                                    : "transparent",
+                            }}
+                            onFocus={() => {
+                                setIsSpanRefFocused(true);
+                            }}
+                            onBlur={() => setIsSpanRefFocused(false)}
+                            onChange={(mathField) => {
+                                setLatex(mathField.latex());
+                                handleEquationChange(
+                                    latexToEquation(mathField.latex())
+                                );
+                                console.log(latexToEquation(mathField.latex()));
+                            }}
+                        />
 
-                            <span className="result unselectable">
-                                {" "}
-                                = {localResult ? localResult : "0"}
-                            </span>
-                        </b>
+                        <span className="result unselectable">
+                            <br />= {localResult ? localResult : "0"}
+                        </span>
                     </div>
                     {isEditing ? (
                         <svg

@@ -1,3 +1,15 @@
-1) fix Xarrow scale done
-2) fix Draggable velocity scale done
-3) ideally the grid background should also move on panning , done
+1) fix Xarrow scale -done
+2) fix Draggable velocity scale -done
+3) ideally the grid background should also move on panning 
+4) sqrt
+5) mathjax
+
+Toolbar:
+1) add new tree
+2) see trees, hovering on each makes that one glow
+3) zoom tools
+4) enable minimap
+
+Bugs:
+1) adding new variables and clicking doneEditing sometimes messes up Xarrows
+2) zooming in or out makes background grid disappear
