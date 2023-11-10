@@ -7,7 +7,7 @@ import { useXarrow, Xwrapper } from "react-xarrows";
 import { CustomArrow } from "./CustomArrow";
 import { useTree } from "../hooks/useTree";
 import { useTransformContext } from "react-zoom-pan-pinch";
-import { addStyles, EditableMathField } from "react-mathquill";
+import { addStyles, EditableMathField, StaticMathField } from "react-mathquill";
 
 addStyles();
 
@@ -387,31 +387,32 @@ export const EquCard = (props) => {
                             right: "0px",
                         }}
                     >
-                        <EditableMathField
-                            latex={latex}
-                            ref={spanRef}
-                            suppressContentEditableWarning
-                            contentEditable={isEditing}
-                            className="equ-card-textarea"
-                            style={{
-                                backgroundColor: isEditing
-                                    ? isSpanRefFocused
+                        {isEditing ? (
+                            <EditableMathField
+                                latex={latex}
+                                className="equ-card-textarea"
+                                onChange={(mathField) => {
+                                    setLatex(mathField.latex());
+                                    handleEquationChange(
+                                        latexToEquation(mathField.latex())
+                                    );
+                                    console.log(
+                                        latexToEquation(mathField.latex())
+                                    );
+                                }}
+                            />
+                        ) : (
+                            <StaticMathField
+                                className="equ-card-textarea"
+                                style={{
+                                    backgroundColor: isEditing
                                         ? "rgb(200, 200, 200)"
-                                        : "rgb(218, 218, 218)"
-                                    : "transparent",
-                            }}
-                            onFocus={() => {
-                                setIsSpanRefFocused(true);
-                            }}
-                            onBlur={() => setIsSpanRefFocused(false)}
-                            onChange={(mathField) => {
-                                setLatex(mathField.latex());
-                                handleEquationChange(
-                                    latexToEquation(mathField.latex())
-                                );
-                                console.log(latexToEquation(mathField.latex()));
-                            }}
-                        />
+                                        : "transparent",
+                                }}
+                            >
+                                {latex}
+                            </StaticMathField>
+                        )}
 
                         <span className="result unselectable">
                             <br />= {localResult ? localResult : "0"}
