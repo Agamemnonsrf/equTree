@@ -146,17 +146,29 @@ h2 {
     background-color: rgb(255, 255, 255);
     justify-content: center;
     align-items: center;
-    display: flex;
     border-radius: 30px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
     padding-right: 3rem;
     padding-left: 1rem;
     z-index: 0;
     transform: translateZ(-1px);
+    display: none;
 }
 
 .expand {
-    left: 105%;
+    animation: fade-in 0.2s ease-in;
+    animation-fill-mode: forwards;
+    display: flex;
+}
+
+@keyframes fade-in {
+    0% {
+        left: 0;
+    }
+
+    100% {
+        left: 105%;
+    }
 }
 
 .name-var-popup-input {
