@@ -1,474 +1,401 @@
 import React from "react";
-import "../App.css";
-import Draggable from "react-draggable";
-
-import * as math from "mathjs";
-import { useXarrow, Xwrapper } from "react-xarrows";
-import { CustomArrow } from "./CustomArrow";
-import { useTree } from "../hooks/useTree";
-import { useTransformContext } from "react-zoom-pan-pinch";
 import { addStyles, EditableMathField, StaticMathField } from "react-mathquill";
+import { usePointerDrag } from "../hooks/usePointerDrag";
+import { MIN_CARD_SIZE } from "../lib/layout";
+import { Icon } from "./Icons";
+import { InlineRename } from "./InlineRename";
+import { ResizeHandle } from "./ResizeHandle";
+import { VarPopup, nameError } from "./VarPopup";
 
 addStyles();
 
-export const EquCard = (props) => {
-    const [arrowTrigger, setArrowTrigger] = React.useState(false);
-    const [childrenStatus, setChildrenStatus] = React.useState(true);
-    const [latex, setLatex] = React.useState("");
-    const {
-        isLeaf,
-        setResult,
-        resolveChildren,
-        addNodeStateful,
-        removeNode,
-        getNodeLevel,
-        getChildIndex,
-        childrenSatisfied,
-        getChildren,
-    } = useTree();
-    const updateArrow = useXarrow();
-    const defaultPosition = { x: 200, y: 100 };
+const OPERATOR_NAMES =
+    "sin cos tan cot sec csc arcsin arccos arctan sinh cosh tanh " +
+    "ln log exp max min gcd abs floor ceil round";
 
-    const transformContext = useTransformContext();
-    const [newVar, setNewVar] = React.useState("");
+// Presses on these never start a card drag.
+const INTERACTIVE = "button, input, select, textarea, .no-drag, .mq-editable-field";
+
+const stopPropagation = (e) => e.stopPropagation();
+
+const doneBlockedReason = (result) => {
+    if (result.error) return result.error;
+    if (result.unused) return "Its parent's equation doesn't use this variable";
+    if (result.duplicate) return "Another card already defines this variable";
+    if (result.strayLinks && result.strayLinks.length > 0) {
+        return "It's linked to values its equation doesn't use";
+    }
+    return "A card further down the branch isn't solved yet";
+};
+
+const EquCardView = ({
+    node,
+    label,
+    result,
+    highlighted,
+    autoFocus,
+    linkState,
+    groupDragging,
+    request,
+    calculus,
+    actions,
+}) => {
+    const isRoot = node.parent === null;
+    const locked = !node.editing;
+    const anchorRef = React.useRef(null);
+    const cardRef = React.useRef(null);
+    const tabRef = React.useRef(null);
+    const fieldRef = React.useRef(null);
     const [isNamingVar, setIsNamingVar] = React.useState(false);
-    const [localResult, setLocalResult] = React.useState("");
-    const [nameVarWarning, setNameVarWarning] = React.useState(false);
-    const [isEditing, setIsEditing] = React.useState(true);
-    const [isEditingBranch, setIsEditingBranch] = React.useState(true);
-    const [isSpanRefFocused, setIsSpanRefFocused] = React.useState(false);
-    const nodeRef = React.useRef(null);
-    const spanRef = React.useRef(null);
-    const newVarRef = React.useRef(null);
+    const [renaming, setRenaming] = React.useState(false);
+    const [dragging, setDragging] = React.useState(false);
+
+    // Report the card's (and its tab's) size so connectors and layout can
+    // use it.
+    React.useLayoutEffect(() => {
+        const el = cardRef.current;
+        const tab = tabRef.current;
+        const report = () =>
+            actions.reportSize(node.id, el.offsetWidth, el.offsetHeight, tab.offsetWidth);
+        report();
+        const observer = new ResizeObserver(report);
+        observer.observe(el);
+        observer.observe(tab);
+        return () => observer.disconnect();
+    }, [node.id, actions]);
+
+    // Keep touches on a card from panning the canvas; mouse presses are
+    // stopped through onMouseDown below.
+    React.useEffect(() => {
+        const el = anchorRef.current;
+        el.addEventListener("touchstart", stopPropagation);
+        return () => el.removeEventListener("touchstart", stopPropagation);
+    }, []);
 
     React.useEffect(() => {
-        updateArrow();
-    }, [arrowTrigger]);
+        if (locked) setIsNamingVar(false);
+    }, [locked]);
 
+    // the right-click menu can ask for the new-variable panel or a rename
     React.useEffect(() => {
-        if (!isEditing) {
-            const equationUnparsed = latexToEquation(latex);
-            const equationClean = equationUnparsed.replace(/\s/g, "");
-            //first try making it so that when done editing the root, its children also get
-            //stopped editing, try that with the updateArrow method, But make sure that
-            //the child cards get resolved first.
-            if (!isLeaf(props.id)) {
-                const varsResults = resolveChildren(props.id);
-                const scope = {};
-                varsResults.forEach((varPair) => {
-                    scope[varPair[0]] = varPair[1];
-                });
-                const equationParsed = math.compile(equationClean);
-                const result = equationParsed.evaluate(scope);
-                setLocalResult(result);
-                setResult(props.id, result);
-                setIsEditingBranch(false);
+        if (!request) return;
+        if (request.kind === "popup" && !locked) setIsNamingVar(true);
+        if (request.kind === "rename") setRenaming(true);
+        actions.clearCardRequest();
+    }, [request, locked, actions]);
+
+    // Dragging moves the card; Shift+drag moves it with everything below it
+    // (the whole tree, from a root). Either way it's one undo step.
+    const startDrag = usePointerDrag({
+        onStart: (e) => {
+            if (e.target.closest(INTERACTIVE)) return false;
+            setDragging(true);
+            actions.setMoving("drag", true);
+            actions.beginGesture();
+            const scale = actions.getScale();
+            if (!e.shiftKey) return { scale, x: node.x, y: node.y };
+            const ids = actions.branchIds(node.id);
+            const doc = actions.getDoc();
+            const starts = Object.fromEntries(
+                ids.map((id) => {
+                    const item = doc.nodes[id] || doc.plots[id];
+                    return [id, { x: item.x, y: item.y }];
+                })
+            );
+            actions.setGroupDrag(ids);
+            return { scale, starts };
+        },
+        onMove: (dx, dy, e, start) => {
+            const mx = dx / start.scale;
+            const my = dy / start.scale;
+            if (!start.starts) {
+                actions.moveItem(node.id, start.x + mx, start.y + my);
+                return;
             }
-        }
-    }, [isEditing]);
+            const positions = {};
+            Object.entries(start.starts).forEach(([id, p]) => {
+                positions[id] = { x: p.x + mx, y: p.y + my };
+            });
+            actions.moveItems(positions);
+        },
+        onEnd: (e, start) => {
+            setDragging(false);
+            actions.setMoving("drag", false);
+            actions.endGesture();
+            if (start.starts) actions.setGroupDrag(null);
+        },
+    });
 
-    //ITS THIS GUY'S FAULT THAT I CANT SAY SQRT() IN THE EQUATION
-    const isValidEquation = (str) => {
-        const invalidOperatorPairs = [
-            "**",
-            "*/",
-            "/*",
-            "//",
-            "()",
-            "^^",
-            "^/",
-            "/^",
-            "^*",
-            "*^",
-            "-)",
-            "+)",
-            "*)",
-            "/*",
-            "^)",
-            "-*",
-            "-/",
-            "-^",
-            "+*",
-            "+/",
-            "+^",
-            "(*",
-            "(/",
-            "(^",
-            "/)",
-            "*)",
-            "+)",
-            "-)",
-            "^)",
-        ];
+    // The plug on the tab: drag it onto another card to use this card's value
+    // there as well. A card can feed any number of equations.
+    const startLink = usePointerDrag({
+        onStart: (e) => {
+            actions.startLink(node.id, e.clientX, e.clientY);
+            return {};
+        },
+        onMove: (dx, dy, e) => actions.updateLink(e.clientX, e.clientY),
+        onEnd: () => actions.endLink(),
+    });
 
-        const functionNames = ["sqrt"];
+    const canFinish = Boolean(result.subtreeOk);
+    const finishRef = React.useRef();
+    finishRef.current = () => {
+        if (canFinish) actions.finishBranch(node.id);
+    };
 
-        const functionRegex = new RegExp(
-            `(${functionNames.join("|")})\\(`,
-            "g"
-        );
-
-        const equation = `(${str})`.replace(functionRegex, "1");
-
-        let open = 0;
-
-        for (let i = 0, len = equation.length; i < len; i++) {
-            const curr = equation[i];
-
-            if (curr === "(") {
-                open += 1;
-            } else if (curr === ")") {
-                open -= 1;
-
-                if (open < 0) {
-                    return false;
-                }
-            }
-
-            if (i > 0) {
-                for (
-                    let j = 0, oplen = invalidOperatorPairs.length;
-                    j < oplen;
-                    j++
-                ) {
-                    if (
-                        equation[i - 1] === invalidOperatorPairs[j][0] &&
-                        curr === invalidOperatorPairs[j][1]
-                    ) {
-                        return false;
+    // MathQuill only reads its config once, so it reaches the latest
+    // handlers through refs.
+    const mathConfig = React.useMemo(
+        () => ({
+            // calculus mode: typing int, sum, prod, partial, infty or lim makes the symbol
+            autoCommands: `pi sqrt nthroot theta${calculus ? " int sum prod partial infty" : ""}`,
+            autoOperatorNames: `${OPERATOR_NAMES}${calculus ? " lim" : ""}`,
+            handlers: {
+                edit: () => {
+                    if (fieldRef.current) {
+                        actions.setLatex(node.id, fieldRef.current.latex());
                     }
-                }
-            }
+                },
+                enter: () => finishRef.current(),
+            },
+        }),
+        [node.id, actions, calculus]
+    );
+
+    // Clicks anywhere around the equation (not just on the typed math) put
+    // the cursor in the field.
+    const focusField = (e) => {
+        if (locked || !fieldRef.current || e.target.closest(".mq-editable-field")) return;
+        e.preventDefault();
+        fieldRef.current.focus();
+        fieldRef.current.moveToRightEnd();
+    };
+
+    const commitRename = (name) => {
+        if (isRoot) actions.renameTree(node.treeId, name);
+        else actions.renameNode(node.id, name);
+        setRenaming(false);
+    };
+
+    const showProblemGlow =
+        result.kind === "missing" || result.unused || result.duplicate;
+    const cardClass = [
+        "equ-card",
+        "unselectable",
+        locked ? "equ-card-locked" : "equ-card-editing",
+        showProblemGlow && "equ-card-problem",
+        highlighted && "equ-card-highlighted",
+        linkState && `equ-card-link-${linkState}`,
+        dragging && "equ-card-dragging",
+        groupDragging && "equ-card-group-dragging",
+    ]
+        .filter(Boolean)
+        .join(" ");
+
+    const renderResult = () => {
+        if (result.display !== undefined) {
+            return <span className="result-value">= {result.display}</span>;
         }
-
-        if (open !== 0) {
-            return false;
+        if (result.kind === "parse" || result.kind === "eval") {
+            return <span className="result-error">{result.error}</span>;
         }
-
-        const sections = equation.split(/[\+\-\*\/\^\)\(]/g);
-
-        for (let i = 0, len = sections.length; i < len; i++) {
-            if (
-                (sections[i].length > 0 &&
-                    !(Number(sections[i]) !== NaN && isFinite(sections[i]))) ||
-                isVariable(sections[i])
-            ) {
-                return false;
-            }
+        if (result.kind === "child") {
+            return <span className="result-muted">{result.error}</span>;
         }
-
-        return true;
+        return <span className="result-muted">= ?</span>;
     };
 
-    const isVariable = (str) => {
-        const match = str.match(/^[a-zA-Z]+$/g);
-        if (match) {
-            return true;
-        }
-    };
-
-    const getVariables = (str) => {
-        const sections = str.split(/[\+\-\*\/\^\)\(]/g);
-        const sectionsFiltered = sections.filter((section) =>
-            isVariable(section)
-        );
-
-        return sectionsFiltered;
-    };
-
-    const containsVariables = (str) => {
-        const sections = str.split(/[\+\-\*\/\^\)\(]/g);
-        const sectionsFiltered = sections.filter((section) =>
-            isVariable(section)
-        );
-        if (sectionsFiltered.length > 0) {
-            return true;
-        }
-    };
-
-    const handleEquationChange = (e) => {
-        const equationClean = e.replace(/\s/g, "");
-
-        if (isValidEquation(equationClean)) {
-            const result = math.evaluate(equationClean);
-            setLocalResult(result);
-            setResult(props.id, result);
-            console.log("resolving success");
-        }
-
-        handleChildrenStatus(equationClean);
-    };
-
-    const handleNameVar = (e) => {
-        const name = e.currentTarget.textContent;
-        //allow only letters and capital letters
-        if (name.match(/^[a-zA-Z]+$/g)) {
-            setNewVar(name);
-        }
-    };
-
-    const handleChildrenStatus = (str) => {
-        if (containsVariables(str)) {
-            const vars = getVariables(str);
-            if (childrenSatisfied(props.id, vars)) {
-                setChildrenStatus(true);
-            } else {
-                setChildrenStatus(false);
-            }
-        } else {
-            setChildrenStatus(true);
-        }
-    };
-
-    const handleNameVarDone = () => {
-        const breh = newVarRef.current.textContent;
-        if (breh === "") return;
-        if (breh.match(/^[a-zA-Z]+$/g)) {
-            const equationUnparsed = latexToEquation(latex);
-            const equationClean = equationUnparsed.replace(/\s/g, "");
-            addNodeStateful(props.id, breh);
-            setIsNamingVar(false);
-            setNameVarWarning(false);
-            handleChildrenStatus(equationClean);
-        } else {
-            setNameVarWarning(true);
-        }
-        setNewVar("");
-    };
-
-    const handleDelete = () => {
-        const equationUnparsed = latexToEquation(latex);
-        const equationClean = equationUnparsed.replace(/\s/g, "");
-        removeNode(props.id);
-        handleChildrenStatus(equationClean);
-    };
-
-    const latexToEquation = (latex) => {
-        const equation = latex
-            .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "($1)/($2)")
-            .replace(/\\sqrt\{([^}]+)\}/g, "sqrt($1)")
-            .replace(/\\left/g, "")
-            .replace(/\\right/g, "")
-            .replace(/\\cdot/g, "*")
-            .replace(/\\times/g, "*")
-            .replace(/\\div/g, "/")
-            .replace(/\\pm/g, "+-")
-            .replace(/\\mp/g, "-+")
-            .replace(/\\pi/g, "pi")
-            .replace(/\\infty/g, "Infinity")
-            .replace(/\\sin/g, "sin")
-            .replace(/\\cos/g, "cos")
-            .replace(/\\tan/g, "tan")
-            .replace(/\\cot/g, "cot")
-            .replace(/\\sec/g, "sec")
-            .replace(/\\csc/g, "csc")
-            .replace(/\\log/g, "log")
-            .replace(/\\ln/g, "ln")
-            .replace(/\\exp/g, "exp")
-            .replace(/\\abs/g, "abs")
-            .replace(/\\frac/g, "frac")
-            .replace(/(\d+)\^(\d+)/g, "($1^$2)")
-            .replace(/{/g, "(")
-            .replace(/}/g, ")");
-
-        return equation;
-    };
     return (
-        <>
-            <Draggable
-                scale={transformContext.transformState.scale}
-                nodeRef={nodeRef}
-                cancel={
-                    ".equ-card-textarea, .equ-card-textarea-container, .name-var-popup"
+        <div
+            className={`card-anchor ${isNamingVar || renaming || dragging ? "raised" : ""}`}
+            ref={anchorRef}
+            style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
+            onMouseDown={stopPropagation}
+        >
+            <div
+                className={cardClass}
+                ref={cardRef}
+                data-id={node.id}
+                style={{ minWidth: node.w || undefined, minHeight: node.h || undefined }}
+                onPointerDown={locked ? startDrag : undefined}
+                onMouseEnter={(e) => e.buttons === 0 && actions.setHoveredCard(node.id)}
+                onMouseLeave={() => actions.setHoveredCard(null)}
+                title={
+                    locked
+                        ? "Locked: drag from anywhere to move (Shift+drag moves the whole branch)"
+                        : undefined
                 }
-                defaultPosition={
-                    props.variable === "root"
-                        ? defaultPosition
-                        : {
-                              x: getNodeLevel(props.id) * 400,
-                              y: getChildIndex(props.id) * 200,
-                          }
-                }
-                onDrag={() => {
-                    updateArrow();
-                    props.setArrowTrigger &&
-                        props.setArrowTrigger((prev) => !prev);
-                    props.setIsDragging(true);
-                }}
-                onStop={() => {
-                    updateArrow();
-                    props.setArrowTrigger &&
-                        props.setArrowTrigger((prev) => !prev);
-                    props.setIsDragging(false);
-                }}
             >
                 <div
-                    className="equ-card unselectable"
-                    ref={nodeRef}
-                    id={props.id}
-                    key={props.id}
-                    style={
-                        !childrenStatus && {
-                            boxShadow: "0 0 10px 5px rgba(255,0,0,1.0)",
-                        }
-                    }
+                    className="equCard-varBox drag-handle"
+                    ref={tabRef}
+                    onPointerDown={locked ? undefined : startDrag}
+                    onDoubleClick={() => setRenaming(true)}
+                    title="Drag to move · Shift+drag to move the whole branch · double-click to rename"
                 >
-                    {props.index}
-                    <div className="equCard-varBox unselectable">
-                        {props.variable}
-                    </div>
-                    <div className="coverUp" />
-                    {props.variable !== "root" && isEditing && (
-                        <svg
-                            className="svg-right"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 448 512"
-                            name="trashcan"
-                            onClick={() => handleDelete()}
-                        >
-                            <path d="M160 400C160 408.8 152.8 416 144 416C135.2 416 128 408.8 128 400V192C128 183.2 135.2 176 144 176C152.8 176 160 183.2 160 192V400zM240 400C240 408.8 232.8 416 224 416C215.2 416 208 408.8 208 400V192C208 183.2 215.2 176 224 176C232.8 176 240 183.2 240 192V400zM320 400C320 408.8 312.8 416 304 416C295.2 416 288 408.8 288 400V192C288 183.2 295.2 176 304 176C312.8 176 320 183.2 320 192V400zM317.5 24.94L354.2 80H424C437.3 80 448 90.75 448 104C448 117.3 437.3 128 424 128H416V432C416 476.2 380.2 512 336 512H112C67.82 512 32 476.2 32 432V128H24C10.75 128 0 117.3 0 104C0 90.75 10.75 80 24 80H93.82L130.5 24.94C140.9 9.357 158.4 0 177.1 0H270.9C289.6 0 307.1 9.358 317.5 24.94H317.5zM151.5 80H296.5L277.5 51.56C276 49.34 273.5 48 270.9 48H177.1C174.5 48 171.1 49.34 170.5 51.56L151.5 80zM80 432C80 449.7 94.33 464 112 464H336C353.7 464 368 449.7 368 432V128H80V432z" />
-                        </svg>
-                    )}
-                    {isEditing && (
-                        <svg
-                            className="svg-right-middle"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 448 512"
-                            onClick={() => {
-                                setIsNamingVar(!isNamingVar);
-                                newVarRef.current.focus();
-                            }}
-                            name="plus"
-                        >
-                            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
-                        </svg>
-                    )}
-                    <div
-                        className={`name-var-popup ${isNamingVar && "expand"}`}
-                    >
-                        <span
-                            className="name-var-popup-input"
-                            tabIndex="1"
-                            contentEditable
-                            ref={newVarRef}
-                            style={
-                                nameVarWarning
-                                    ? { backgroundColor: "red" }
-                                    : { backgroundColor: "rgb(180, 180, 180)" }
+                    <Icon name={locked ? "lock" : "grip"} className="tab-icon" />
+                    {renaming ? (
+                        <InlineRename
+                            initial={label}
+                            validate={
+                                isRoot
+                                    ? undefined
+                                    : (name) => nameError(name, actions.siblingNames(node.id))
                             }
-                            suppressContentEditableWarning
-                            onClick={() => newVarRef.current.focus()}
-                            onChange={handleNameVar}
-                            //New Var Popup
-                        >
-                            {newVar}
-                        </span>
-
-                        <svg
-                            className="svg-var-popup"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"
-                            onClick={handleNameVarDone}
-                            name="check"
-                        >
-                            <path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
-                        </svg>
-                    </div>
-                    <div
-                        className="equ-card-textarea-container"
-                        style={{
-                            textAlign: "center",
-                            position: "relative",
-                            height: "auto",
-                            minWidth: " 60%",
-                            width: "auto",
-                            left: "0px",
-                            bottom: "50px",
-                            right: "0px",
-                        }}
-                    >
-                        {isEditing ? (
-                            <EditableMathField
-                                latex={latex}
-                                className="equ-card-textarea"
-                                onChange={(mathField) => {
-                                    setLatex(mathField.latex());
-                                    handleEquationChange(
-                                        latexToEquation(mathField.latex())
-                                    );
-                                    console.log(
-                                        latexToEquation(mathField.latex())
-                                    );
-                                }}
-                            />
-                        ) : (
-                            <StaticMathField
-                                className="equ-card-textarea"
-                                style={{
-                                    backgroundColor: isEditing
-                                        ? "rgb(200, 200, 200)"
-                                        : "transparent",
-                                }}
-                            >
-                                {latex}
-                            </StaticMathField>
-                        )}
-
-                        <span className="result unselectable">
-                            <br />= {localResult ? localResult : "0"}
-                        </span>
-                    </div>
-                    {isEditing ? (
-                        <svg
-                            className="svg"
-                            onClick={() =>
-                                childrenStatus && setIsEditing(!isEditing)
-                            }
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"
-                            name="check"
-                        >
-                            <path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
-                        </svg>
+                            onCommit={commitRename}
+                            onCancel={() => setRenaming(false)}
+                        />
                     ) : (
-                        <svg
-                            className="svg"
-                            onClick={() => setIsEditing(!isEditing)}
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"
-                            name="edit"
+                        <span className="tab-label">{label}</span>
+                    )}
+                    {result.unused && (
+                        <span className="badge" title="Its parent's equation doesn't use this variable">
+                            unused
+                        </span>
+                    )}
+                    {result.duplicate && (
+                        <span className="badge" title="Another card already defines this variable">
+                            duplicate
+                        </span>
+                    )}
+                    <span
+                        className="link-port no-drag"
+                        onPointerDown={startLink}
+                        title={`Drag onto another card to use ${label || "this"} there too`}
+                    />
+                </div>
+
+                <div className="equ-card-body">
+                    <div className="equ-field-container" onMouseDown={focusField}>
+                        <div className={`equ-field ${locked ? "locked" : ""}`}>
+                            {locked ? (
+                                <StaticMathField className="equ-math">{node.latex}</StaticMathField>
+                            ) : (
+                                <EditableMathField
+                                    // MathQuill reads its config once, so a new mode needs a new field
+                                    key={calculus ? "calculus" : "plain"}
+                                    latex={node.latex}
+                                    className="equ-math"
+                                    config={mathConfig}
+                                    mathquillDidMount={(field) => {
+                                        fieldRef.current = field;
+                                        if (autoFocus) field.focus();
+                                    }}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="result">{renderResult()}</div>
+
+                    {!locked && result.missing && result.missing.length > 0 && (
+                        <div className="missing no-drag">
+                            <span>Needs</span>
+                            {result.missing.map((name) => (
+                                <span key={name} className="chip-split">
+                                    <button
+                                        className="chip"
+                                        title={`Add a card for ${name}`}
+                                        onClick={() => actions.addChild(node.id, name)}
+                                    >
+                                        + {name}
+                                    </button>
+                                    <button
+                                        className="chip chip-remove"
+                                        title={`Remove ${name} from the equation`}
+                                        aria-label={`Remove ${name} from the equation`}
+                                        onClick={() => actions.removeFromEquation(node.id, name)}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                </div>
+
+                <div className="equ-card-actions">
+                    {locked ? (
+                        <button
+                            key="edit"
+                            className="icon-btn icon-pop"
+                            onClick={() => actions.editNode(node.id)}
+                            title="Unlock to edit"
                         >
-                            <path d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.8 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z" />
-                        </svg>
+                            <Icon name="edit" />
+                        </button>
+                    ) : (
+                        <button
+                            key="done"
+                            className="icon-btn icon-pop"
+                            disabled={!canFinish}
+                            onClick={() => finishRef.current()}
+                            title={canFinish ? "Done (Enter): lock this branch" : doneBlockedReason(result)}
+                        >
+                            <Icon name="check" />
+                        </button>
+                    )}
+                    <span className="spacer" />
+                    <button
+                        className="icon-btn"
+                        onClick={() => actions.addPlot(node.id)}
+                        title="Plot this equation"
+                    >
+                        <Icon name="chart" />
+                    </button>
+                    {!locked && !isRoot && (
+                        <button
+                            className="icon-btn"
+                            onClick={() => actions.detachNode(node.id)}
+                            title="Disconnect into a tree of its own"
+                        >
+                            <Icon name="unlink" />
+                        </button>
+                    )}
+                    {!locked && (
+                        <button
+                            className={`icon-btn plus-btn ${isNamingVar ? "open" : ""}`}
+                            onClick={() => setIsNamingVar((open) => !open)}
+                            title={isNamingVar ? "Close" : "Add a variable"}
+                            aria-expanded={isNamingVar}
+                        >
+                            <Icon name="plus" />
+                        </button>
+                    )}
+                    {!locked && !isRoot && (
+                        <button
+                            className="icon-btn icon-btn-danger"
+                            onClick={() => actions.confirmDeleteNode(node.id)}
+                            title={`Delete ${node.variable}`}
+                        >
+                            <Icon name="trash" />
+                        </button>
                     )}
                 </div>
-            </Draggable>
-            {getChildren(props.id).map((child) => {
-                return (
-                    <EquCard
-                        key={child.id}
-                        id={child.id}
-                        variable={child.value}
-                        parent={child.parent}
-                        children={child.children}
-                        arrowTrigger={arrowTrigger}
-                        setArrowTrigger={setArrowTrigger}
-                        childrenStatus={childrenStatus}
-                        setChildrenStatus={setChildrenStatus}
-                        setIsDragging={props.setIsDragging}
+
+                {isNamingVar && (
+                    <VarPopup
+                        nodeId={node.id}
+                        label={label}
+                        missing={result.missing}
+                        actions={actions}
+                        onClose={() => setIsNamingVar(false)}
                     />
-                );
-            })}
-            {getChildren(props.id).map((child) => {
-                return (
-                    <CustomArrow
-                        start={props.id}
-                        end={child.id}
-                        scale={transformContext.transformState.scale}
-                        key={child.id + props.id}
-                    />
-                );
-            })}
-        </>
+                )}
+
+                <ResizeHandle
+                    targetRef={cardRef}
+                    min={MIN_CARD_SIZE}
+                    getScale={actions.getScale}
+                    onResize={(w, h) => actions.resizeItem(node.id, w, h)}
+                    onReset={() => actions.resizeItem(node.id, null, null)}
+                    onStart={actions.beginGesture}
+                    onEnd={actions.endGesture}
+                />
+            </div>
+        </div>
     );
 };
+
+export const EquCard = React.memo(EquCardView);

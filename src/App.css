@@ -1,208 +1,1534 @@
-.Header {
-    height: 15vh;
-    width: 100%;
-    background-color: rgb(255, 255, 255);
+/* ---------- Theme ---------- */
+
+:root {
+    --canvas-bg: rgb(211, 211, 211);
+    --grid-line: rgba(0, 0, 0, 0.09);
+    --surface: #ffffff;
+    --surface-hover: rgb(232, 232, 232);
+    --sidebar-bg: #ffffff;
+    --field-bg: rgb(218, 218, 218);
+    --field-focus-bg: #ffffff;
+    --field-shadow: rgba(0, 0, 0, 0.3);
+    --field-shadow-strong: rgba(0, 0, 0, 0.7);
+    --text: #111111;
+    --text-muted: #777777;
+    --text-faint: #a8a8a8;
+    --icon: rgb(60, 60, 60);
+    --border: #dddddd;
+    --card-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    --card-shadow-lifted: 0 0 5px rgba(0, 0, 0, 0.5), 0 14px 30px rgba(0, 0, 0, 0.3);
+    --tab-shadow: rgba(0, 0, 0, 0.45);
+    --popup-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 10px 30px rgba(0, 0, 0, 0.2);
+    --accent: rgb(66, 133, 244);
+    --accent-soft: rgba(66, 133, 244, 0.14);
+    --accent-glow: rgba(66, 133, 244, 0.9);
+    --danger: rgb(210, 40, 40);
+    --danger-glow: rgba(255, 0, 0, 1);
+    --success: rgb(34, 160, 90);
+    --success-glow: rgba(34, 160, 90, 0.7);
+    --primary-bg: rgb(40, 40, 40);
+    --primary-hover: rgb(70, 70, 70);
+    --primary-text: #ffffff;
+    --btn-bg: rgb(225, 225, 225);
+    --btn-hover: rgb(205, 205, 205);
+    --connector: whitesmoke;
+    --connector-shadow: rgba(0, 0, 0, 0.35);
+    --connector-flow: rgb(66, 133, 244);
+    --label-bg: #ffffff;
+    --label-border: rgba(0, 0, 0, 0.18);
+    --plot-link: rgb(140, 90, 230);
+    --plot-grid: rgba(0, 0, 0, 0.07);
+    --plot-axis: rgba(0, 0, 0, 0.35);
+    --mq-empty: rgba(0, 0, 0, 0.12);
+    --mq-selection: #b4d5fe;
+    --series-1: #2563eb;
+    --series-2: #e5532d;
+    --series-3: #16a34a;
+    --series-4: #9333ea;
+    --series-5: #d97706;
+
+    --ease: cubic-bezier(0.2, 0.9, 0.3, 1);
+    --fast: 120ms;
+    --medium: 200ms;
+    color-scheme: light;
 }
 
-* {
-    pointer-events: all;
-    transform: translateZ(0);
+:root[data-theme="dark"] {
+    --canvas-bg: #1b1d21;
+    --grid-line: rgba(255, 255, 255, 0.06);
+    --surface: #2a2d33;
+    --surface-hover: #383c44;
+    --sidebar-bg: #23262b;
+    --field-bg: #1e2125;
+    --field-focus-bg: #15171a;
+    --field-shadow: rgba(0, 0, 0, 0.6);
+    --field-shadow-strong: rgba(0, 0, 0, 0.9);
+    --text: #e9e9ec;
+    --text-muted: #9ea1a8;
+    --text-faint: #6c7079;
+    --icon: #c9cbd1;
+    --border: #3a3e46;
+    --card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 4px 16px rgba(0, 0, 0, 0.55);
+    --card-shadow-lifted: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 16px 34px rgba(0, 0, 0, 0.7);
+    --tab-shadow: rgba(0, 0, 0, 0.5);
+    --popup-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.6);
+    --accent: rgb(110, 165, 255);
+    --accent-soft: rgba(110, 165, 255, 0.18);
+    --accent-glow: rgba(110, 165, 255, 0.85);
+    --danger: rgb(240, 90, 90);
+    --danger-glow: rgba(240, 60, 60, 0.9);
+    --success: rgb(70, 200, 120);
+    --success-glow: rgba(70, 200, 120, 0.6);
+    --primary-bg: #e9e9ec;
+    --primary-hover: #ffffff;
+    --primary-text: #16181b;
+    --btn-bg: #353941;
+    --btn-hover: #42474f;
+    --connector: #8d929b;
+    --connector-shadow: transparent;
+    --connector-flow: rgb(130, 180, 255);
+    --label-bg: #2a2d33;
+    --label-border: rgba(255, 255, 255, 0.14);
+    --plot-link: rgb(175, 135, 255);
+    --plot-grid: rgba(255, 255, 255, 0.07);
+    --plot-axis: rgba(255, 255, 255, 0.35);
+    --mq-empty: rgba(255, 255, 255, 0.14);
+    --mq-selection: rgba(110, 165, 255, 0.4);
+    --series-1: #60a5fa;
+    --series-2: #fb7c55;
+    --series-3: #4ade80;
+    --series-4: #c084fc;
+    --series-5: #fbbf24;
+    color-scheme: dark;
 }
+
+body {
+    background-color: var(--canvas-bg);
+    color: var(--text);
+}
+
+/* ---------- Layout ---------- */
+
+.app {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.muted {
+    color: var(--text-muted);
+}
+
+.small {
+    font-size: 12px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+    font-family: "Rubik", sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    border: none;
+    border-radius: 30px;
+    background-color: var(--btn-bg);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+
+.btn:hover {
+    background-color: var(--btn-hover);
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+    box-shadow: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-block {
+    width: 100%;
+    padding: 10px;
+}
+
+.btn-small {
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: var(--sidebar-bg);
+    color: var(--text);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+    z-index: 20;
+    font-family: "Rubik", sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header img {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+}
+
+.sidebar-header h1 {
+    font-size: 22px;
+    margin: 0;
+}
+
+.sidebar-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-section h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-align: left;
+    margin: 0 0 10px 0;
+}
+
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.section-head h2 {
+    margin: 0;
+}
+
+.sidebar-trees {
+    flex-grow: 1;
+}
+
+.sidebar-muted {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.sidebar-help {
+    font-size: 14px;
+    border-bottom: none;
+}
+
+.sidebar-help summary {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.sidebar-help ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.sidebar-help li {
+    margin-bottom: 6px;
+}
+
+.zoom-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.zoom-controls .btn {
+    font-size: 18px;
+    line-height: 1;
+    width: 42px;
+}
+
+.zoom-controls .zoom-level {
+    flex-grow: 1;
+    font-size: 14px;
+}
+
+.button-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.button-row .btn {
+    flex: 1;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.segmented {
+    display: flex;
+    margin-top: 12px;
+    padding: 3px;
+    border-radius: 30px;
+    background-color: var(--btn-bg);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.segmented button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: 30px;
+    padding: 5px 0;
+    cursor: pointer;
+    transition: background-color var(--medium) var(--ease), color var(--medium) var(--ease);
+}
+
+.segmented button.on {
+    background-color: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 8px 7px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color var(--fast) var(--ease);
+}
+
+.list-item:hover {
+    background-color: var(--accent-soft);
+}
+
+.list-item.active {
+    background-color: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.list-item-text {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.list-item-name {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-item-detail {
+    font-size: 13px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-item-buttons {
+    display: flex;
+    opacity: 0;
+    transition: opacity var(--fast) var(--ease);
+}
+
+.list-item:hover .list-item-buttons,
+.list-item:focus-within .list-item-buttons {
+    opacity: 1;
+}
+
+.list-item-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 6px;
+}
+
+.list-item-button svg {
+    width: 15px;
+    height: 15px;
+}
+
+.list-item-button:hover {
+    color: var(--text);
+    background-color: var(--surface-hover);
+}
+
+.list-item-delete:hover {
+    color: var(--danger);
+}
+
+.inline-rename {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: var(--text);
+    background-color: var(--field-focus-bg);
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    padding: 1px 6px;
+    outline: none;
+    min-width: 0;
+}
+
+.inline-rename.invalid {
+    border-color: var(--danger);
+    background-color: rgba(210, 40, 40, 0.12);
+}
+
+.sidebar-rename {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 15px;
+}
+
+/* ---------- Canvas ---------- */
 
 .canvas {
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-    background-color: rgb(211, 211, 211);
-    background-image: url("/public/grid-img.png");
-    background-repeat: repeat;
-    background-size: 100px 100px;
-    background-position: center;
+    flex-grow: 1;
     position: relative;
     overflow: hidden;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    background-color: var(--canvas-bg);
+    font-family: "Rubik", sans-serif;
+    transition: background-color var(--medium) var(--ease);
+}
+
+/* Bigger than the canvas by a few cells so it can be shifted by up to one
+   cell (see Canvas.js) without showing an edge. */
+.canvas-grid {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(100% + 200px);
+    height: calc(100% + 200px);
+    pointer-events: none;
+    will-change: transform;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* while panning, zooming or dragging, move the content as one composited
+   layer and pause the connector animation */
+.canvas.is-moving .canvas-content,
+.canvas.is-moving .card-anchor.raised {
+    will-change: transform;
+}
+
+.canvas.is-moving .connector-flow {
+    animation-play-state: paused;
+}
+
+.canvas-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    cursor: grab;
+}
+
+.canvas-wrapper:active {
+    cursor: grabbing;
+}
+
+.canvas-linking,
+.canvas-linking * {
+    cursor: crosshair !important;
+}
+
+.canvas-content {
+    width: 1px !important;
+    height: 1px !important;
+    overflow: visible !important;
+}
+
+.empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.empty-state .btn {
+    pointer-events: all;
+}
+
+/* ---------- Connectors ---------- */
+
+.connectors {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.connector-path {
+    fill: none;
+    stroke: var(--connector);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    animation: draw-connector 450ms var(--ease) both;
+    transition: stroke var(--medium) var(--ease);
+}
+
+/* a soft dark edge under each line, cheaper than a drop-shadow filter */
+.connector-halo {
+    fill: none;
+    stroke: var(--connector-shadow);
+    stroke-width: 7;
+    stroke-linecap: round;
+    opacity: 0.45;
+}
+
+.connector-stray .connector-halo,
+.connector-highlighted .connector-halo {
+    opacity: 0;
+}
+
+@keyframes draw-connector {
+    from {
+        stroke-dashoffset: 1;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* dots drifting along the line towards the equation that uses the value */
+.connector-flow {
+    fill: none;
+    stroke: var(--connector-flow);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 22;
+    opacity: 0.75;
+    animation: connector-flow 1.4s linear infinite;
+}
+
+@keyframes connector-flow {
+    from {
+        stroke-dashoffset: 22.1;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.connector-arrow {
+    fill: var(--connector);
+    stroke: var(--connector-shadow);
+    stroke-width: 1;
+    stroke-opacity: 0.5;
+    transition: fill var(--medium) var(--ease);
+}
+
+.connector-socket {
+    fill: var(--canvas-bg);
+    stroke: var(--connector);
+    stroke-width: 3;
+}
+
+.connector-label {
+    pointer-events: all;
+    cursor: default;
+}
+
+.connector-label-hit {
+    fill: transparent;
+}
+
+.connector-label-pill {
+    fill: var(--label-bg);
+    stroke: var(--label-border);
+    stroke-width: 1;
+}
+
+.connector-label-shared .connector-label-pill {
+    stroke-dasharray: 3 2;
+    stroke: var(--connector-flow);
+}
+
+/* the × that cuts a connection, shown while hovering its label */
+.connector-cut {
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--fast) var(--ease);
+}
+
+.connector-label:hover .connector-cut {
+    opacity: 1;
+}
+
+.connector-cut circle {
+    fill: var(--surface);
+    stroke: var(--label-border);
+}
+
+.connector-cut path {
+    stroke: var(--text-muted);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.connector-cut:hover circle {
+    fill: var(--danger);
+    stroke: var(--danger);
+}
+
+.connector-cut:hover path {
+    stroke: white;
+}
+
+.connector-label text {
+    font-family: "Rubik", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--text);
+}
+
+.connector-label {
+    animation: fade-in var(--medium) var(--ease) both;
+}
+
+.connector-label-highlighted .connector-label-pill {
+    stroke: var(--accent);
+    stroke-width: 2;
+}
+
+.connector-label-stray .connector-label-pill {
+    stroke: var(--danger);
+    stroke-dasharray: 3 2;
+}
+
+.connector-stray .connector-path {
+    stroke: var(--danger);
+    stroke-dasharray: 0.03 0.025;
+    stroke-linecap: butt;
+    animation: none;
+    opacity: 0.6;
+}
+
+.connector-stray .connector-arrow,
+.connector-stray .connector-socket {
+    fill: var(--danger);
+    stroke: var(--danger);
+    opacity: 0.6;
+}
+
+.connector-highlighted .connector-path,
+.connector-highlighted .connector-socket {
+    stroke: var(--accent);
+}
+
+.connector-highlighted .connector-arrow {
+    fill: var(--accent);
+}
+
+.connector-plot .connector-path {
+    stroke: var(--plot-link);
+    stroke-width: 3;
+    stroke-dasharray: 0.012 0.012;
+    stroke-linecap: butt;
+    animation: none;
+}
+
+.connector-plot .connector-arrow {
+    fill: var(--plot-link);
+}
+
+.connector-preview path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-dasharray: 8 6;
+    animation: connector-flow 0.6s linear infinite;
+}
+
+.connector-preview circle,
+.connector-preview polygon {
+    fill: var(--accent);
+}
+
+.connector-preview.valid path {
+    stroke: var(--success);
+}
+
+.connector-preview.valid polygon {
+    fill: var(--success);
+}
+
+.connector-preview.invalid path {
+    stroke: var(--danger);
+}
+
+.connector-preview.invalid polygon {
+    fill: var(--danger);
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+/* ---------- Cards ---------- */
+
+.card-anchor {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.card-anchor.raised,
+.card-anchor:focus-within {
+    z-index: 5;
+}
+
+/* Cards sit inside the grab-cursor canvas, so they reset the cursor: only
+   tabs (and locked cards, which drag from anywhere) show the hand. */
+.equ-card,
+.plot-card {
+    position: relative;
+    box-sizing: border-box;
+    cursor: default;
+    background-color: var(--surface);
+    color: var(--text);
+    box-shadow: var(--card-shadow);
+    font-family: "Rubik", sans-serif;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow var(--medium) var(--ease), background-color var(--medium) var(--ease);
 }
 
 .equ-card {
     min-height: 150px;
-    background-color: white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    min-width: 240px;
+    padding: 18px 22px 14px 22px;
     border-radius: 30px;
-    font-size: calc(10px + 2vmin);
-    min-width: 230px;
-    padding: 2vh;
-    position: relative;
-    z-index: 10;
-    transform-style: preserve-3d;
+    font-size: 20px;
+    gap: 8px;
 }
 
-.equ-card-textarea {
-    height: auto;
-    min-width: 90%;
-    width: auto;
-    border-radius: 30px !important;
-    font-family: "Rubik", sans-serif;
-    background-color: rgb(218, 218, 218);
-    padding: 10px;
-    font-size: calc(5px + 2vmin);
-    outline: none !important;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3) !important;
-    caret-color: rgb(0, 0, 0);
-    transition: all 0.3s ease-in-out;
+.equ-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
 }
 
-.equ-card-textarea:focus {
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7) !important;
-    background-color: rgb(255, 255, 255);
+.equ-card-locked {
+    cursor: grab;
 }
+
+.equ-card-dragging,
+.equ-card-dragging * {
+    cursor: grabbing !important;
+}
+
+.equ-card-dragging {
+    box-shadow: var(--card-shadow-lifted);
+}
+
+.equ-card-problem {
+    box-shadow: 0 0 10px 5px var(--danger-glow);
+}
+
+.equ-card-highlighted {
+    box-shadow: 0 0 12px 6px var(--accent-glow);
+}
+
+.equ-card-link-valid {
+    box-shadow: 0 0 0 3px var(--success), 0 0 18px 6px var(--success-glow);
+}
+
+.equ-card-link-invalid {
+    box-shadow: 0 0 0 3px var(--danger), 0 0 14px 4px var(--danger-glow);
+}
+
+.equ-card-link-source {
+    box-shadow: 0 0 0 3px var(--accent), var(--card-shadow);
+}
+
+/* name tab: a pill tucked under the card's top edge. Only its top 36px show;
+   the card covers the rest, so hovering it can never tint the card. */
 
 .equCard-varBox {
-    font-family: "Rubik", sans-serif;
-    width: auto;
-    display: inline-block;
-    padding-left: 25px;
-    padding-right: 25px;
-    padding-top: 5px;
-    height: 35px;
-    font-size: calc(5px + 2vmin);
-    background-color: white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-    border-top-right-radius: 30px;
-    border-top-left-radius: 30px;
-    position: relative;
-    translate: 0px -45px;
+    position: absolute;
+    z-index: -1;
+    left: 26px;
+    bottom: calc(100% - 14px);
+    height: 50px;
+    box-sizing: border-box;
+    padding: 0 12px 14px 10px;
+    background-color: var(--surface);
+    border-radius: 18px;
+    box-shadow: 0 0 5px var(--tab-shadow);
+    font-size: 17px;
     font-weight: bold;
-}
-
-.coverUp {
-    min-width: 17vw;
-    height: 20px;
-    border-top-right-radius: 30px;
-    border-top-left-radius: 15;
-    translate: 0px -55px;
-    background-color: white;
-    position: relative;
-}
-
-.equ-card-textarea::selection {
-    background: lightslategray;
-}
-
-h2 {
-    font-family: "Rubik", sans-serif;
-    font-size: calc(10px + 2vmin);
-    color: rgb(0, 0, 0);
-    text-align: center;
-    margin: 10px;
-}
-
-.svg {
-    width: 17px;
-    height: 17px;
-    display: block;
-    stroke-width: 1;
-    stroke: rgb(170, 170, 170);
-    stroke-miterlimit: 10;
-    stroke-dashoffset: 0;
-    margin: 20px;
-    position: absolute;
-    bottom: 0;
-    cursor: pointer;
-}
-
-.svg-right {
-    width: 17px;
-    height: 17px;
-    display: block;
-    stroke-width: 1;
-    stroke: rgb(170, 170, 170);
-    stroke-miterlimit: 10;
-    stroke-dashoffset: 0;
-    margin: 20px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    cursor: pointer;
-}
-
-.svg-right-middle {
-    width: 17px;
-    height: 17px;
-    display: block;
-    stroke-width: 1;
-    stroke: rgb(170, 170, 170);
-    stroke-miterlimit: 10;
-    stroke-dashoffset: 0;
-    margin: 20px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    cursor: pointer;
-    translate: 0px -200%;
-}
-
-.name-var-popup {
-    position: absolute;
-    transition: all 0.3s;
-    height: 25%;
-    left: 0;
-    background-color: rgb(255, 255, 255);
-    justify-content: center;
-    align-items: center;
-    border-radius: 30px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-    padding-right: 3rem;
-    padding-left: 1rem;
-    z-index: 0;
-    transform: translateZ(-1px);
-    display: none;
-}
-
-.expand {
-    animation: fade-in 0.2s ease-in;
-    animation-fill-mode: forwards;
+    white-space: nowrap;
     display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: background-color var(--fast) var(--ease);
 }
 
-@keyframes fade-in {
-    0% {
-        left: 0;
-    }
-
-    100% {
-        left: 105%;
-    }
+.drag-handle {
+    cursor: grab;
+    touch-action: none;
 }
 
-.name-var-popup-input {
-    width: auto;
-    min-width: 30px;
-    height: 50%;
-    background-color: rgb(180, 180, 180);
-    border-radius: 30px;
+.drag-handle:hover {
+    background-color: var(--surface-hover);
+}
+
+.tab-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    fill: var(--text-faint);
+    color: var(--text-faint);
+    transition: fill var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.drag-handle:hover .tab-icon {
+    fill: var(--text-muted);
+    color: var(--text-muted);
+}
+
+.equ-card-locked .tab-icon {
+    color: var(--accent);
+}
+
+.tab-icon-chart {
+    color: var(--plot-link);
+}
+
+.drag-handle:hover .tab-icon-chart {
+    color: var(--plot-link);
+}
+
+.link-port {
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
+    margin-left: 2px;
+    border-radius: 50%;
+    border: 2.5px solid var(--accent);
+    background-color: var(--surface);
+    cursor: crosshair;
+    touch-action: none;
+    transition: transform var(--fast) var(--ease), background-color var(--fast) var(--ease);
+}
+
+.link-port:hover {
+    transform: scale(1.35);
+    background-color: var(--accent);
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white;
+    background-color: var(--danger);
+    border-radius: 10px;
+    padding: 2px 7px;
+    animation: fade-in var(--medium) var(--ease) both;
+}
+
+/* equation field: the pill lives on a wrapper that stays mounted, so locking
+   a card fades it out instead of swapping it instantly */
+
+.equ-field-container {
     text-align: center;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
-    outline: none;
-    transition: 0.5s;
-    font-size: calc(2px + 2vmin);
-    padding: 0.4rem 1rem 0.4rem 1rem;
-    font-family: "Rubik", sans-serif;
+    cursor: text;
 }
 
-.svg-var-popup {
-    width: 17px;
-    height: 17px;
+.equ-card-locked .equ-field-container {
+    cursor: inherit;
+}
+
+.equ-field {
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 90%;
+    border-radius: 30px;
+    background-color: var(--field-bg);
+    box-shadow: inset 0 0 5px var(--field-shadow);
+    transition: background-color var(--medium) var(--ease), box-shadow var(--medium) var(--ease),
+        padding var(--medium) var(--ease);
+}
+
+.equ-field:focus-within {
+    background-color: var(--field-focus-bg);
+    box-shadow: inset 0 0 5px var(--field-shadow-strong);
+}
+
+.equ-field.locked {
+    background-color: transparent;
+    box-shadow: inset 0 0 5px transparent;
+}
+
+/* the math field fills its whole pill, so a click anywhere on it lands in
+   the field */
+.equ-card .equ-math,
+.equ-card .equ-math.mq-editable-field,
+.equ-card .equ-math.mq-focused {
     display: block;
-    stroke-width: 1;
-    stroke: rgb(170, 170, 170);
-    stroke-miterlimit: 10;
-    stroke-dashoffset: 0;
-    margin: 20px;
-    position: absolute;
-    right: 0;
-    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 16px;
+    cursor: text;
+    font-family: "Rubik", sans-serif;
+    font-size: 20px;
+    color: var(--text);
+    border: none;
+    box-shadow: none;
+    outline: none;
+    background: transparent;
+}
+
+.equ-card .mq-editable-field .mq-cursor {
+    border-left-color: var(--text);
+}
+
+.equ-card .mq-math-mode .mq-empty {
+    background-color: var(--mq-empty);
+}
+
+.equ-card .mq-editable-field .mq-selection,
+.equ-card .mq-editable-field .mq-selection .mq-non-leaf,
+.equ-card .mq-editable-field .mq-selection .mq-scaled {
+    background-color: var(--mq-selection) !important;
 }
 
 .result {
-    /* no selection */
+    text-align: center;
+    font-size: 20px;
+    min-height: 26px;
+    word-break: break-all;
+}
+
+.result-value {
+    font-weight: 500;
+}
+
+.result-muted {
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.result-error {
+    color: var(--danger);
+    font-size: 15px;
+}
+
+.missing {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-muted);
+    animation: fade-in var(--medium) var(--ease) both;
+}
+
+.chip {
+    font-family: "Rubik", sans-serif;
+    font-size: 14px;
+    border: none;
+    border-radius: 20px;
+    padding: 4px 11px;
+    color: white;
+    background-color: var(--danger);
+    cursor: pointer;
+    transition: transform var(--fast) var(--ease), filter var(--fast) var(--ease);
+}
+
+.chip:hover {
+    filter: brightness(0.88);
+}
+
+.chip:active {
+    transform: scale(0.94);
+}
+
+.equ-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0 -8px;
+    cursor: default;
+}
+
+.equ-card-locked .equ-card-actions {
+    cursor: inherit;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    padding: 8px;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--icon);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color var(--fast) var(--ease), color var(--fast) var(--ease),
+        transform var(--fast) var(--ease);
+}
+
+.icon-btn svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+}
+
+.icon-btn:hover {
+    background-color: var(--surface-hover);
+}
+
+.icon-btn:active {
+    transform: scale(0.88);
+}
+
+.icon-btn-danger:hover {
+    color: var(--danger);
+}
+
+.icon-btn:disabled {
+    cursor: not-allowed;
+    background: none;
+    color: var(--text-faint);
+    opacity: 0.6;
+    transform: none;
+}
+
+/* the check and pencil swap with a quick pop instead of a jump */
+.icon-pop {
+    animation: icon-pop var(--medium) var(--ease) both;
+}
+
+@keyframes icon-pop {
+    from {
+        transform: scale(0.4) rotate(-30deg);
+        opacity: 0;
+    }
+}
+
+/* + turns into × while the new variable panel is open */
+.plus-btn svg {
+    transition: transform var(--medium) var(--ease);
+}
+
+.plus-btn.open {
+    background-color: var(--accent-soft);
+    color: var(--accent);
+}
+
+.plus-btn.open svg {
+    transform: rotate(135deg);
+}
+
+/* ---------- New variable panel ---------- */
+
+.var-popup {
+    position: absolute;
+    left: calc(100% + 16px);
+    top: 0;
+    width: 310px;
+    box-sizing: border-box;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    background-color: var(--surface);
+    color: var(--text);
+    border-radius: 22px;
+    box-shadow: var(--popup-shadow);
+    cursor: default;
+    transform-origin: left top;
+    animation: popup-in var(--medium) var(--ease) both;
+}
+
+@keyframes popup-in {
+    from {
+        opacity: 0;
+        transform: translateX(-12px) scale(0.96);
+    }
+}
+
+.var-popup-title {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.var-popup-row {
+    display: flex;
+    gap: 8px;
+}
+
+.var-popup-input {
+    flex: 1;
+    min-width: 0;
+    font-family: "Rubik", sans-serif;
+    font-size: 20px;
+    color: var(--text);
+    padding: 10px 16px;
+    border: none;
+    border-radius: 30px;
+    background-color: var(--field-bg);
+    box-shadow: inset 0 0 5px var(--field-shadow);
+    outline: none;
+    transition: background-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+
+.var-popup-input:focus {
+    background-color: var(--field-focus-bg);
+    box-shadow: inset 0 0 5px var(--field-shadow-strong), 0 0 0 2px var(--accent-soft);
+}
+
+.var-popup-input.invalid {
+    box-shadow: inset 0 0 5px var(--field-shadow), 0 0 0 2px var(--danger);
+}
+
+.var-popup-error {
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--danger);
+    padding-left: 12px;
+    opacity: 0;
+    transform: translateY(-3px);
+    transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+
+.var-popup-error.shown {
+    opacity: 1;
+    transform: none;
+}
+
+.var-popup-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.var-popup-label {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.var-popup-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.var-popup-trees {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.var-popup-tree {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    text-align: left;
+    border: 1px solid var(--border);
+    background: none;
+    border-radius: 12px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background-color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+
+.var-popup-tree:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.var-popup-hint {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: right;
+}
+
+/* ---------- Connect dialog ---------- */
+
+.dialog-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    animation: fade-in var(--medium) var(--ease) both;
+}
+
+.dialog {
+    width: 340px;
+    max-width: calc(100% - 32px);
+    box-sizing: border-box;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: var(--surface);
+    color: var(--text);
+    border-radius: 22px;
+    box-shadow: var(--popup-shadow);
+    animation: popup-in var(--medium) var(--ease) both;
+}
+
+.dialog h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: normal;
+}
+
+.dialog p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+/* ---------- Resize handle ---------- */
+
+/* a corner grip: always faintly visible, clearer when the card is hovered */
+.resize-handle {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 22px;
+    height: 22px;
+    border-bottom-right-radius: 18px;
+    cursor: nwse-resize;
+    touch-action: none;
+    opacity: 0.35;
+    transition: opacity var(--fast) var(--ease), background-color var(--fast) var(--ease);
+    background-image: linear-gradient(
+        135deg,
+        transparent 40%,
+        var(--text-muted) 40%,
+        var(--text-muted) 48%,
+        transparent 48%,
+        transparent 58%,
+        var(--text-muted) 58%,
+        var(--text-muted) 66%,
+        transparent 66%,
+        transparent 76%,
+        var(--text-muted) 76%,
+        var(--text-muted) 84%,
+        transparent 84%
+    );
+}
+
+.equ-card:hover > .resize-handle,
+.plot-card:hover > .resize-handle {
+    opacity: 0.8;
+}
+
+.resize-handle:hover {
+    opacity: 1 !important;
+    background-color: var(--accent-soft);
+}
+
+/* ---------- Plot cards ---------- */
+
+.plot-card {
+    /* width and height come from the card (fixed, so hovering can't resize it) */
+    padding: 14px 18px 10px 18px;
+    border-radius: 24px;
+    font-size: 14px;
+    gap: 8px;
+}
+
+.plot-number {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background-color: var(--field-bg);
+    outline: none;
+}
+
+.plot-number:focus {
+    border-color: var(--accent);
+}
+
+.plot-number {
+    width: 64px;
+}
+
+.plot-chart {
     position: relative;
+    flex: 1;
+    min-height: 170px;
+    cursor: crosshair;
+}
+
+.plot-chart svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+}
+
+.plot-grid {
+    stroke: var(--plot-grid);
+}
+
+.plot-axis {
+    stroke: var(--plot-axis);
+}
+
+.plot-frame {
+    fill: none;
+    stroke: var(--border);
+}
+
+.plot-tick {
+    font-size: 11px;
+    fill: var(--text-muted);
+}
+
+.plot-line {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.plot-current-line {
+    stroke: var(--text-faint);
+    stroke-dasharray: 4 4;
+}
+
+.plot-hover-line {
+    stroke: var(--text-muted);
+}
+
+.plot-dot {
+    stroke: var(--surface);
+    stroke-width: 2;
+}
+
+.plot-message {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    text-align: center;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+}
+
+.plot-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-chip {
+    display: inline-flex;
+    align-items: center;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-muted);
+    transition: background-color var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.legend-chip.on {
+    background-color: var(--btn-bg);
+    border-color: var(--text-faint);
+    color: var(--text);
+}
+
+.legend-toggle,
+.legend-remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 2px 10px;
+    cursor: pointer;
+}
+
+.legend-remove {
+    padding: 2px 8px 2px 0;
+    font-size: 15px;
+}
+
+.legend-remove:hover {
+    color: var(--danger);
+}
+
+.legend-swatch {
+    width: 16px;
+    height: 0;
+    border-top-width: 3px;
+}
+
+.plot-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 34px;
+    margin-right: 6px;
+}
+
+.plot-readout {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Minimap ---------- */
+
+.minimap {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    background-color: var(--surface);
+    opacity: 0.92;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    line-height: 0;
+    cursor: pointer;
+    z-index: 15;
+}
+
+.minimap svg {
+    touch-action: none;
+}
+
+.minimap-card {
+    fill: var(--text-faint);
+}
+
+.minimap-root {
+    fill: var(--icon);
+}
+
+.minimap-plot {
+    fill: var(--plot-link);
+    opacity: 0.7;
+}
+
+.minimap-error {
+    fill: var(--danger);
+}
+
+.minimap-highlighted {
+    fill: var(--accent);
+    opacity: 1;
+}
+
+.minimap-viewport {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+    stroke-width: 1.5;
 }
 
 .unselectable {
@@ -213,4 +1539,594 @@ h2 {
     -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none; /* Non-prefixed version, currently
                         supported by Chrome, Opera and Firefox */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+
+    .connector-flow {
+        display: none;
+    }
+}
+
+
+.equ-card-group-dragging {
+    box-shadow: 0 0 0 3px var(--accent), var(--card-shadow-lifted);
+}
+
+/* ---------- Bold lines (the "Lines" setting) ---------- */
+
+:root {
+    --connector-bold: #4a5260;
+}
+
+:root[data-theme="dark"] {
+    --connector-bold: #cfd4dd;
+}
+
+.lines-bold .connector-path {
+    stroke: var(--connector-bold);
+    stroke-width: 6;
+}
+
+.lines-bold .connector-halo {
+    stroke-width: 10;
+    opacity: 0.25;
+}
+
+.lines-bold .connector-flow {
+    stroke-width: 6;
+    opacity: 0.95;
+}
+
+.lines-bold .connector-arrow {
+    fill: var(--connector-bold);
+}
+
+.lines-bold .connector-socket {
+    stroke: var(--connector-bold);
+    stroke-width: 4;
+}
+
+.lines-bold .connector-label text {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.lines-bold .connector-label-pill {
+    stroke: var(--connector-bold);
+    stroke-width: 1.5;
+}
+
+.lines-bold .connector-highlighted .connector-path,
+.lines-bold .connector-highlighted .connector-socket {
+    stroke: var(--accent);
+}
+
+.lines-bold .connector-highlighted .connector-arrow {
+    fill: var(--accent);
+}
+
+.lines-bold .connector-stray .connector-path {
+    stroke: var(--danger);
+}
+
+.lines-bold .connector-stray .connector-arrow {
+    fill: var(--danger);
+}
+
+.lines-bold .connector-plot .connector-path {
+    stroke: var(--plot-link);
+    stroke-width: 4;
+}
+
+.lines-bold .connector-plot .connector-arrow {
+    fill: var(--plot-link);
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.setting-row .segmented {
+    margin-top: 0;
+    flex: 1;
+    max-width: 150px;
+}
+
+/* ---------- Undo / redo toolbar ---------- */
+
+.canvas-toolbar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 15;
+    display: flex;
+    gap: 6px;
+}
+
+.toolbar-btn {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--surface);
+    color: var(--icon);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: background-color var(--fast) var(--ease), transform var(--fast) var(--ease),
+        opacity var(--fast) var(--ease);
+}
+
+.toolbar-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.toolbar-btn:hover {
+    background-color: var(--surface-hover);
+}
+
+.toolbar-btn:active {
+    transform: scale(0.92);
+}
+
+.toolbar-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+    transform: none;
+    background-color: var(--surface);
+}
+
+/* ---------- Right-click menu ---------- */
+
+.context-menu {
+    position: fixed;
+    z-index: 100;
+    min-width: 210px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--surface);
+    color: var(--text);
+    border-radius: 14px;
+    box-shadow: var(--popup-shadow);
+    font-family: "Rubik", sans-serif;
+    font-size: 14px;
+    transform-origin: top left;
+    animation: menu-in 110ms var(--ease) both;
+}
+
+@keyframes menu-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+}
+
+.context-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 7px 12px;
+    border: none;
+    border-radius: 9px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.context-menu-item:hover,
+.context-menu-item:focus-visible,
+.context-menu-item:focus {
+    background-color: var(--accent-soft);
+    outline: none;
+}
+
+.context-menu-item.danger {
+    color: var(--danger);
+}
+
+.context-menu-item:disabled {
+    opacity: 0.4;
+    cursor: default;
+    background: none;
+}
+
+.context-menu-hint {
+    font-size: 12px;
+    color: var(--text-faint);
+}
+
+.context-menu-separator {
+    height: 1px;
+    margin: 5px 6px;
+    background-color: var(--border);
+}
+
+/* ---------- Plot controls ---------- */
+
+.icon-btn-small {
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+    font-family: inherit;
+    font-size: 17px;
+    line-height: 1;
+}
+
+.icon-btn-small svg {
+    width: 14px;
+    height: 14px;
+}
+
+.plot-buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.plot-fit {
+    width: auto;
+    border-radius: 14px;
+    padding: 0 9px;
+    font-size: 12px;
+}
+
+.plot-chart.panning,
+.plot-chart.panning svg {
+    cursor: grabbing;
+}
+
+/* ---------- Missing-variable chips: + adds a card, × takes it out ---------- */
+
+.chip-split {
+    display: inline-flex;
+}
+
+.chip-split .chip:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-right: 8px;
+}
+
+.chip-remove {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 4px 9px 4px 7px;
+    margin-left: 1px;
+    filter: brightness(0.85);
+}
+
+.chip-remove:hover {
+    filter: brightness(0.7);
+}
+
+/* ---------- Confirm dialog ---------- */
+
+.dialog-backdrop-fixed {
+    position: fixed;
+    z-index: 200;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+    box-shadow: none;
+}
+
+.btn-danger:hover,
+.btn-danger:focus-visible {
+    background-color: var(--danger);
+    filter: brightness(0.9);
+}
+
+/* ---------- Plot tooltip and range bars ---------- */
+
+.plot-tooltip {
+    position: absolute;
+    z-index: 2;
+    min-width: 140px;
+    max-width: 240px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+    background-color: var(--surface);
+    color: var(--text);
+    border-radius: 10px;
+    box-shadow: var(--popup-shadow);
+    pointer-events: none;
+}
+
+.plot-tooltip-x {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.plot-tooltip-row {
+    display: grid;
+    grid-template-columns: 16px 1fr auto;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.plot-tooltip-row span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.plot-tooltip-swatch {
+    height: 0;
+    border-top-width: 3px;
+}
+
+/* ---------- Graph controls and sliders ---------- */
+
+.plot-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.plot-x {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.plot-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+}
+
+.plot-sliders-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.slider-row {
+    display: grid;
+    grid-template-columns: minmax(40px, 90px) 1fr 70px 28px;
+    align-items: center;
+    gap: 8px;
+}
+
+.slider-label {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.slider-row.changed .slider-label {
+    color: var(--accent);
+}
+
+.slider-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.slider-row .plot-number {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px 8px;
+    font-size: 13px;
+}
+
+.slider-reset {
+    font-size: 15px;
+}
+
+.link-btn {
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+.plot-note {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* a line that doesn't use the current x-axis, so isn't drawn */
+.legend-chip.unused-line {
+    opacity: 0.55;
+    border-style: dashed;
+}
+
+.plot-caption {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.plot-caption b {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.plot-axis-title {
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--text-muted);
+}
+
+.slider-base {
+    display: block;
+    font-size: 11px;
+    font-weight: normal;
+    color: var(--text-muted);
+}
+
+/* ---------- Dropdown (themed <select>) ---------- */
+
+.dropdown {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dropdown-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 72px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background-color: var(--field-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 10px 5px 14px;
+    cursor: pointer;
+    transition: border-color var(--fast) var(--ease), background-color var(--fast) var(--ease);
+}
+
+.dropdown-button:hover,
+.dropdown-button.open,
+.dropdown-button:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.dropdown-value {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.dropdown-chevron {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    transition: transform var(--fast) var(--ease);
+}
+
+.dropdown-button.open .dropdown-chevron {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 20;
+    min-width: max(100%, 140px);
+    max-height: 240px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 5px;
+    list-style: none;
+    background-color: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--popup-shadow);
+    animation: menu-in 110ms var(--ease) both;
+    transform-origin: top left;
+}
+
+.dropdown-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.dropdown-option.active {
+    background-color: var(--accent-soft);
+}
+
+.dropdown-option.selected {
+    font-weight: 500;
+    color: var(--accent);
+}
+
+.dropdown-check {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* ---------- Calculus mode ---------- */
+
+.setting-row-first {
+    margin-top: 0;
+}
+
+.calculus-help {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.calculus-help p {
+    margin: 0 0 6px 0;
+}
+
+.calculus-help dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 10px;
+}
+
+.calculus-help dt {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.calculus-help dd {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.calculus-help code {
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text);
+    background-color: var(--btn-bg);
+    border-radius: 5px;
+    padding: 0 4px;
 }

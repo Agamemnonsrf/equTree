@@ -1,15 +1,111 @@
-1) fix Xarrow scale -done
+1) fix Xarrow scale -done (replaced Xarrow with connectors drawn inside the zoomed canvas)
 2) fix Draggable velocity scale -done
-3) ideally the grid background should also move on panning 
-4) sqrt
-5) mathjax
+3) ideally the grid background should also move on panning -done
+4) sqrt -done (also nth roots, fractions, powers, |x|, trig, ln/log)
+5) mathjax -done (MathQuill)
 
 Toolbar:
-1) add new tree
-2) see trees, hovering on each makes that one glow
-3) zoom tools
-4) enable minimap
+1) add new tree -done
+2) see trees, hovering on each makes that one glow -done (click one to jump to it, double-click to rename)
+3) zoom tools -done (zoom in/out, reset to 100%, fit all, tidy layout)
+4) enable minimap -done
 
 Bugs:
-1) adding new variables and clicking doneEditing sometimes messes up Xarrows
-2) zooming in or out makes background grid disappear
+1) adding new variables and clicking doneEditing sometimes messes up Xarrows -fixed
+2) zooming in or out makes background grid disappear -fixed
+
+Round 2:
+1) disconnect nodes from trees and connect them to others -done (drag the ● on a card's tab onto another card; unlink button cuts a card loose)
+2) lines show which way values flow -done (arrow into the equation using the value, "x = 5" label, dots drifting towards the parent)
+3) rename trees -done (double-click a card's tab or the pencil in the sidebar; works for variables too)
+4) multiple canvases saved in the browser -done (each remembers its trees, plots and pan/zoom)
+5) + turns into × while the new variable panel is open; bigger panel with suggestions and "plug in an existing tree" -done
+6) connectors attach to the side or corner facing the other card (8 directions) -done
+7) resizable cards that still grow with their content -done (corner handle, double-click to reset)
+8) dark mode -done (Light / System / Dark)
+9) smoother animations -done (cards are memoized; field fades instead of jumping; icons pop)
+10) drag editing cards by their tab, locked cards from anywhere; grip and lock icons show which -done
+11) plot cards -done (sweep any variable below an equation, with lines for the cards in between)
+
+
+
+
+Round 3:
+1) clicking into an equation was hard -fixed (the math field fills its whole pill again; clicks beside it focus it too)
+2) arrows snap to 4 sides only -done (and an arrow coming from above lands beside the name tab, not under it)
+3) lag when dragging and panning -fixed (moves render in the same frame; dragging no longer re-evaluates every
+   equation or re-renders the sidebar; grid moves as its own layer; connectors dropped their shadow filters;
+   content moves as one composited layer while panning/zooming/dragging)
+4) one card can feed several parents -done (drag its ● onto another card; the × on a line's label cuts that one
+   connection; cycles are refused)
+
+Round 4:
+1) "Remove" button for unused variables -done (on the card, and in the right-click menu)
+2) plots pan (drag), zoom (wheel / + − buttons, Shift = x only, Alt = y only), fit (double-click), and show several
+   variables at once, each in its own colour -done
+3) each plotted variable has its own range; its line stops at the range's ends (marked faintly) -done
+4) undo/redo: Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z and buttons top-left -done (a drag/resize/typing burst is one step;
+   plain text boxes keep their own undo)
+5) Shift+drag a card to move it with everything below it (a root moves its whole tree) -done
+6) right-click menu on cards, plots and the canvas -done
+7) tab is a pill tucked under the card; hovering only tints the tab -done
+8) editing cards no longer show a grab cursor on their body -fixed
+9) "Lines: Normal / Bold" setting -done
+10) hovering a tree highlights cards it borrows values from too -done
+
+Round 5:
+1) a variable with no card can be taken out of the equation's text (× on its "Needs" chip, or right-click);
+   the one-click removal of unused cards is gone -done
+2) plots keep a fixed size (hover values show in a tooltip); ranges have draggable bars under the x-axis -done
+3) default ranges centred on 0, y-axis only clips real spikes, short axis labels (2k, 1M), plots refit when
+   their equations change -done
+4) every delete asks in an in-app dialog (cards, trees, plots, canvases) -done
+5) plot lines: the equation, its direct inputs, and any card dropped onto the plot with the ● plug -done
+6) arrows meeting the same side of a card sit next to each other -done
+7) hovering a card highlights everything it's computed from -done
+8) (request cut off: "when connecting a node that has a name ...") -ask
+9) tidy layout spaces cards further apart and puts plots in a column beside their tree -done
+
+Round 6:
+1) plots work like a graphing calculator: new variables have no limits, "fit" shows about -10..10 and y fits
+   what's visible, panning keeps drawing; limits are set by dragging the hollow ends of the range bars
+   (double-click a limit to remove it) or typing -done
+2) a card dropped onto a plot brings its variables along as x-axis choices (its first one is plotted right
+   away), and lines that don't change with the plotted variable aren't drawn as flat lines -done
+3) tidy layout + "Angled" lines: connections route at right angles in their own lanes, and plots sit right
+   below their equation, after its branch, so their lines don't cross other cards -done
+4) bigger, always-visible resize grip -done
+
+Round 7:
+1) sin(pi) showed 1.22e-16 (floating point can't store pi exactly) -fixed: rounding noise from trig functions and
+   sums that cancel out is snapped to 0, like a calculator
+2) a sine dropped onto a plot with bigger curves was squashed flat on the shared y-axis -fixed: lines on very
+   different scales get their own y-scales (auto; or force "shared"/"own scales" in the plot's footer), and
+   plots take about one sample per pixel so waves stay smooth
+3) curved connecting lines are the default again (Angled is still in the sidebar) -done
+
+Round 8 (plots redesigned):
+- Graph: an equation against ONE plain-number input (no card's equation is ever overridden); lines are cards that
+  change with that input; every other input is a "what if" slider kept on the plot (cards don't change).
+  Cards dropped onto a graph are drawn only if they use its x input.
+- What matters most: every input varied by the same ±% (10/25/50/100), lines meet at today's value, inputs ranked
+  by how much they move the result.
+- removed: several x variables on one axis, per-line y-scales, per-variable range bars; old plots are converted.
+- removed the hover hint tooltip on charts.
+
+Round 9:
+- removed "what matters most"
+- any card can be dropped onto a graph: drawn if it uses the x-axis input, otherwise listed (dimmed) with a link to
+  plot against one of its own inputs; its inputs join the x-axis choices
+
+Round 10 (plots explain themselves):
+- axis titles (x: the input, y: the equation), a caption ("Coulomb's Law as r changes, with q1 and q2 held at the
+  values below"), "Held at" sliders that show the card's own value when moved
+- moving a slider keeps the axes still so the curve visibly moves; Fit re-fits
+
+Round 11 (calculus mode):
+- a sidebar switch; off, the app is exactly as before (calculus notation says to turn it on)
+- derivatives d/dx (...), dΦ/dt, d^2y/dx^2 up to the 4th, ∂ too: taken at the value of the card named after the
+  variable, recomputing the chain in between (Faraday: EMF = -N dΦ/dt, Φ = B·A·cos(ωt))
+- definite integrals ∫_a^b ... dx (limits can be ∞), Σ and ∏ with n=1 below (Σ can run to ∞), lim_{x->a}
+- all numeric (Richardson differences, adaptive Gauss–Legendre, accelerated series), with a cheat sheet in the sidebar
